@@ -5,6 +5,7 @@ import (
 	"myapp/auth"
 	"net/http"
 	"path/filepath"
+	"slices"
 )
 
 func PartialHandler(w http.ResponseWriter, r *http.Request) {
@@ -15,13 +16,7 @@ func PartialHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     partial := r.URL.Path[len("/load-partial/"):]
-    allowed := false
-    for _, p := range claims.ValidPartials {
-        if p == partial {
-            allowed = true
-            break
-        }
-    }
+    allowed := slices.Contains(claims.ValidPartials, partial)
     if !allowed {
         http.Error(w, "Forbidden", http.StatusForbidden)
         return
