@@ -3,6 +3,7 @@ package handlers
 import (
 	"html/template"
 	"myapp/auth"
+	"myapp/db"
 	"net/http"
 	"path/filepath"
 	"slices"
@@ -23,10 +24,7 @@ func PartialHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     // Rotate token
-    if err := auth.SetTokenCookie(w); err != nil {
-        http.Error(w, "Server error", http.StatusInternalServerError)
-        return
-    }
+    auth.SetTokenCookieWithClaims(w, claims)
 
     tmplPath := filepath.Join("templates", "partials", partial+".html")
     tmpl, err := template.ParseFiles(tmplPath)
@@ -34,5 +32,13 @@ func PartialHandler(w http.ResponseWriter, r *http.Request) {
         http.Error(w, "Not Found", http.StatusNotFound)
         return
     }
-    tmpl.Execute(w, nil)
+
+    // Fetch user info from DB
+    user, err := db.GetUserByID(claims.UserID)
+    if err != nil {
+        http.Error(w, "User not found", http.StatusNotFound)
+        return
+    }
+
+    tmpl.Execute(w, user)
 }
