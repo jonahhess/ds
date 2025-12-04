@@ -19,11 +19,17 @@ func DashboardHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    tmplPath := filepath.Join("templates", "dashboard.html")
-    tmpl, err := template.ParseFiles(tmplPath)
+  // Parse base layout + page + JS component
+    tmpl, err := template.ParseFiles(
+        filepath.Join("templates", "layouts", "base.html"),
+        filepath.Join("templates", "dashboard.html"),
+    )
     if err != nil {
         http.Error(w, "Template error", http.StatusInternalServerError)
         return
     }
-    tmpl.Execute(w, nil)
+
+    tmpl.ExecuteTemplate(w, "base.html", map[string]string{
+        "Title": "Dashboard",
+    })
 }
