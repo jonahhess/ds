@@ -23,7 +23,10 @@ func RootHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    tmpl.ExecuteTemplate(w, "base.html", map[string]string{
+    if err := tmpl.ExecuteTemplate(w, "base.html", map[string]string{
         "Title": "My App",
-    })
+    }); err != nil {
+        http.Error(w, "Template execution error", http.StatusInternalServerError)
+        return
+    }
 }
