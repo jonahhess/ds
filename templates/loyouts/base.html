@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Datastar</title>
+    <title>{{ .Title }}</title>
     <link rel="stylesheet" href="style.css" />
     <script
       type="module"
@@ -9,7 +9,6 @@
     ></script>
   </head>
   <body>
-    <div id="feed" data-on:click="@get('/test')">Click Here</div>
-    <div id="output"></div>
+    {{ block "content" . }}{{ end }}
   </body>
 </html>

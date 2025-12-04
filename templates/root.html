@@ -1,0 +1,12 @@
+{{ define "content" }}
+<h1>Welcome!</h1>
+<nav>
+  <a href="/dashboard" class="nav-link">Go to Dashboard</a>
+</nav>
+<section id="partials">
+  <button data-partial="user-profile" class="load-partial">Load Profile</button>
+  <button data-partial="settings-form" class="load-partial">
+    Load Settings
+  </button>
+</section>
+{{ template "partial-handler" . }} {{ end }}
