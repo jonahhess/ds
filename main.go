@@ -9,7 +9,7 @@ import (
 
 func main() {
     // Initialize SQLite database
-    err := db.InitDB("myapp.db")
+    err := db.InitDB("db/myapp.db")
     if err != nil {
         panic(fmt.Sprintf("Database init failed: %v", err))
     }
