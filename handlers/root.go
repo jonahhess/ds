@@ -17,7 +17,6 @@ func RootHandler(w http.ResponseWriter, r *http.Request) {
     tmpl, err := template.ParseFiles(
         filepath.Join("templates", "layouts", "base.html"),
         filepath.Join("templates", "root.html"),
-        filepath.Join("templates", "components", "partial-handler.html"),
     )
     if err != nil {
         http.Error(w, "Template error", http.StatusInternalServerError)
