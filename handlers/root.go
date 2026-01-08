@@ -1,10 +1,13 @@
 package handlers
 
 import (
-	"html/template"
+	"context"
 	"myapp/auth"
+	"myapp/templates"
+	"myapp/templates/layouts"
 	"net/http"
-	"path/filepath"
+
+	"github.com/a-h/templ"
 )
 
 func RootHandler(w http.ResponseWriter, r *http.Request) {
@@ -13,19 +16,9 @@ func RootHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Parse base layout + page + JS component
-    tmpl, err := template.ParseFiles(
-        filepath.Join("templates", "layouts", "base.html"),
-        filepath.Join("templates", "root.html"),
-    )
-    if err != nil {
-        http.Error(w, "Template error", http.StatusInternalServerError)
-        return
-    }
-
-    if err := tmpl.ExecuteTemplate(w, "base.html", map[string]string{
-        "Title": "My App",
-    }); err != nil {
+    // Render templ component using generated templ components
+    comp := layouts.Base("My App", templates.Root())
+    if err := comp.Render(templ.InitializeContext(context.TODO()), w); err != nil {
         http.Error(w, "Template execution error", http.StatusInternalServerError)
         return
     }
