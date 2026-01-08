@@ -23,6 +23,7 @@ func main() {
     })
     http.HandleFunc("/load-partial/", handlers.PartialHandler)
     http.HandleFunc("/dashboard", handlers.DashboardHandler)
+    http.HandleFunc("/reports", handlers.ReportsHandler)
 
     fs := http.FileServer(http.Dir("./static"))
     http.Handle("/static/", http.StripPrefix("/static/", fs))
