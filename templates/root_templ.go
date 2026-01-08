@@ -29,7 +29,7 @@ func Root() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1>Welcome!</h1><nav><a href=\"/dashboard\" class=\"nav-link\">Go to Dashboard</a></nav><section id=\"partials\"><button data-partial=\"user-profile\" data-on:click=\"@get('/partials/load-profile')\" class=\"load-partial\">Load Profile</button> <button data-partial=\"settings-form\" class=\"load-partial\">Load Settings</button></section>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<nav><ul><a href=\"/\" class=\"nav-link\">Home</a> <a href=\"/dashboard\" class=\"nav-link\">Dashboard</a> <a href=\"/reports\" class=\"nav-link\">Reports</a></ul></nav><h1>Welcome!</h1><section id=\"partials\"><button data-partial=\"user-profile\" data-on:click=\"@get('/partials/load-profile')\" class=\"load-partial\">Load Profile</button> <button data-partial=\"settings-form\" class=\"load-partial\">Load Settings</button></section>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
