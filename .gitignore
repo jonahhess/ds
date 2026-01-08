@@ -4,3 +4,4 @@ myapp
 auth/token.go
 auth/
 *.db
+.air.toml
