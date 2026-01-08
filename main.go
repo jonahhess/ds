@@ -5,6 +5,8 @@ import (
 	"myapp/db"
 	"myapp/handlers"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
 )
 
 func main() {
@@ -14,21 +16,16 @@ func main() {
     }
     db.CreateTables()
 
-    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-        if r.URL.Path != "/" {
-            http.NotFound(w, r)
-            return
-        }
-        handlers.RootHandler(w, r)
-    })
-    http.HandleFunc("/load-partial/", handlers.PartialHandler)
-    http.HandleFunc("/dashboard", handlers.DashboardHandler)
-    http.HandleFunc("/reports", handlers.ReportsHandler)
+    r := chi.NewRouter()
+
+    r.Get("/", handlers.RootHandler)
+    r.Post("/load-partial/", handlers.PartialHandler)
+    r.Get("/dashboard", handlers.DashboardHandler)
+    r.Get("/reports", handlers.ReportsHandler)
 
     fs := http.FileServer(http.Dir("./static"))
-    http.Handle("/static/", http.StripPrefix("/static/", fs))
-
+    r.Handle("/static/*", http.StripPrefix("/static/", fs))
 
     fmt.Println("Server running on http://localhost:8080")
-    http.ListenAndServe(":8080", nil)
+    http.ListenAndServe(":8080", r)
 }
