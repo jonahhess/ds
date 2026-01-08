@@ -19,7 +19,6 @@ func main() {
     r := chi.NewRouter()
 
     r.Get("/", handlers.RootHandler)
-    r.Post("/load-partial/", handlers.PartialHandler)
     r.Get("/dashboard", handlers.DashboardHandler)
     r.Get("/reports", handlers.ReportsHandler)
 
