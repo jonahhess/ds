@@ -8,7 +8,8 @@ import (
 
 func PageStyles(page string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
-		href := "/static/pages/" + page + "/" + strings.ToLower(page) + ".css"
+		loweredPage := strings.ToLower(page)
+		href := "/static/pages/" + loweredPage + "/" + loweredPage + ".css"
 
 		_, err := io.WriteString(
 			w,
