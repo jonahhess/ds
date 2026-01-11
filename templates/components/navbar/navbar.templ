@@ -21,9 +21,9 @@ func GetUserLinks(user types.UserType) []types.Link {
 }
 
 templ Navbar(user types.UserType) {
-	<header>
+	<header class="navbar">
 		for _, l := range GetUserLinks(user) {
-			<a href={ l.Href }>{ l.Title }</a>
+			<a class="navbar-element" href={ l.Href }>{ l.Title }</a>
 		}
 	</header>
 }
