@@ -11,7 +11,7 @@ func GetUserLinks(user types.UserType) []types.Link {
 		login := types.Link{Href: "/login", Title: "Log In"}
 		signup := types.Link{Href: "/signup", Title: "Sign Up"}
 		links = []types.Link{home, login, signup}
-	case types.User:
+	case types.UserType(1):
 		profile := types.Link{Href: "/about", Title: "About"}
 		logout := types.Link{Href: "/logout", Title: "Logout"}
 		links = []types.Link{home, profile, logout}
