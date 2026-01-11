@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"myapp/types"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -51,15 +52,9 @@ func UpsertUser(id, name, email, username string) error {
 }
 
 // Example: fetch a user by ID
-type User struct {
-    ID       string
-    Name     string
-    Email    string
-    Username string
-}
 
-func GetUserByID(id string) (*User, error) {
-    u := &User{}
+func GetUserByID(id string) (*types.User, error) {
+    u := &types.User{}
     query := `SELECT id, name, email, username FROM users WHERE id = ?`
     row := DB.QueryRow(query, id)
     err := row.Scan(&u.ID, &u.Name, &u.Email, &u.Username)
