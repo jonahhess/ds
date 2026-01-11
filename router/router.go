@@ -33,7 +33,7 @@ r.Handle(
 )
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		layouts.Base("Home",pages.Head(), pages.Home(types.UserType(0))).Render(context.TODO(),w)	
+		layouts.Base("Home",pages.HomeHead(), pages.HomePage(types.UserType(0))).Render(context.TODO(),w)	
 	})
 
 	return r
