@@ -24,7 +24,7 @@ func InitDB(path string) error {
 }
 
 // Example: create a users table
-func CreateTables() error {
+func CreateUsersTable() error {
     query := `
     CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
@@ -32,6 +32,24 @@ func CreateTables() error {
         email TEXT NOT NULL,
         username TEXT
     );
+    `
+    _, err := DB.Exec(query)
+    return err
+}
+
+func CreateSessionsTable() error {
+    query := `
+    CREATE TABLE sessions (
+    id TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    expires_at DATETIME NOT NULL,
+    data BLOB,
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_sessions_user_id ON sessions(user_id);
+CREATE INDEX idx_sessions_expires_at ON sessions(expires_at);
     `
     _, err := DB.Exec(query)
     return err
@@ -53,7 +71,7 @@ func UpsertUser(id, name, email, username string) error {
 
 // Example: fetch a user by ID
 
-func GetUserByID(id string) (*types.User, error) {
+func GetUserByID(id int64) (*types.User, error) {
     u := &types.User{}
     query := `SELECT id, name, email, username FROM users WHERE id = ?`
     row := DB.QueryRow(query, id)
@@ -63,3 +81,15 @@ func GetUserByID(id string) (*types.User, error) {
     }
     return u, nil
 }
+
+func GetUserByEmail(email string) (*types.User, error) {
+    u := &types.User{}
+    query := `SELECT id, name, email, username FROM users WHERE email = ?`
+    row := DB.QueryRow(query, email)
+    err := row.Scan(&u.ID, &u.Name, &u.Email, &u.Username)
+    if err != nil {
+        return nil, err
+    }
+    return u, nil
+}
+

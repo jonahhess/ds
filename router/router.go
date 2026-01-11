@@ -4,20 +4,20 @@ import (
 	"context"
 	"net/http"
 
+	"myapp/auth"
 	"myapp/layouts"
 	home "myapp/pages/home"
-	"myapp/types"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/gorilla/sessions"
 )
 
 func SetupRoutes(
 	appCtx context.Context,
-	sessionStore *sessions.CookieStore,
+	sessionStore *sqliteStore,
 ) *chi.Mux {
 
 	r := chi.NewRouter()
+	r.Use(auth.AuthMiddleware(sessionStore))
 
 	// ---- static files ----
 	r.Handle("/static/*",
@@ -40,18 +40,13 @@ func SetupRoutes(
 
 	// ---- routes ----
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		// example session usage
-		session, _ := sessionStore.Get(r, "myapp")
-
-		userType, ok := session.Values["userType"].(types.UserType)
+		user, ok := auth.UserFromContext(r.Context())
 		if !ok {
-			userType = types.UserType(0)
-			session.Values["userType"] = userType
+			http.Error(w,"User not found",http.StatusInternalServerError)
 		}
-		_ = session.Save(r, w)
-
+		
 		err := layouts.
-			Base("Home", home.Home(userType)).
+			Base("Home", user, home.Home(user.UserType)).
 			Render(r.Context(), w)
 
 		if err != nil {

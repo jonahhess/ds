@@ -1,8 +1,11 @@
 package layouts
 
-import "myapp/components/navbar"
+import (
+	"myapp/components/navbar"
+	"myapp/types"
+)
 
-templ Base(page string, content templ.Component) {
+templ Base(page string, user types.User, content templ.Component) {
 	<!DOCTYPE html>
 	<html>
 		<head>
@@ -14,7 +17,7 @@ templ Base(page string, content templ.Component) {
 			@PageStyles(page)
 		</head>
 		<body>
-			@components.Navbar(1)
+			@components.Navbar(user.UserType)
 			@content
 		</body>
 	</html>
