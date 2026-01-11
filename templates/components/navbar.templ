@@ -11,7 +11,7 @@ func GetUserLinks(user types.UserType) []types.Link {
 		login := types.Link{Href: "/login", Title: "Log In"}
 		signup := types.Link{Href: "/signup", Title: "Sign Up"}
 		links = []types.Link{home, login, signup}
-	case types.UserType(1):
+	case types.User:
 		profile := types.Link{Href: "/about", Title: "About"}
 		logout := types.Link{Href: "/logout", Title: "Logout"}
 		links = []types.Link{home, profile, logout}
@@ -21,9 +21,9 @@ func GetUserLinks(user types.UserType) []types.Link {
 }
 
 templ Navbar(user types.UserType) {
-	<header class="navbar">
+	<header>
 		for _, l := range GetUserLinks(user) {
-			<a class="navbar-element" href={ l.Href }>{ l.Title }</a>
+			<a href={ l.Href }>{ l.Title }</a>
 		}
 	</header>
 }

@@ -37,7 +37,7 @@ func Home(user types.UserType) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case types.User:
+		case types.UserType(1):
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<h1>Hello User</h1>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
