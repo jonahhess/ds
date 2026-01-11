@@ -1,15 +1,18 @@
 package layouts
 
+import "myapp/templates/components"
+
 templ Base(title string, content templ.Component) {
 	<!DOCTYPE html>
 	<html>
 		<head>
 			<title>{ title }</title>
-            <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
 			<link rel="stylesheet" href="/static/reset.css"/>
-            <script defer type="module" src="static/datastar.js"></script>
-            </head>
+			<script defer type="module" src="static/datastar.js"></script>
+		</head>
 		<body>
+			@components.Navbar(1)
 			@content
 		</body>
 	</html>

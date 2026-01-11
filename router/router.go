@@ -1,8 +1,11 @@
 package router
 
 import (
-	"myapp/handlers"
+	"context"
 	"net/http"
+
+	pages "myapp/pages/home"
+	"myapp/types"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -13,9 +16,9 @@ func SetupRoutes() *chi.Mux {
 	fs := http.FileServer(http.Dir("./static"))
 	r.Handle("/static/*", http.StripPrefix("/static/", fs))
 
-	r.Get("/", handlers.RootHandler)
-	r.Get("/dashboard", handlers.DashboardHandler)
-	r.Get("/reports", handlers.ReportsHandler)
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		pages.Home(types.UserType(0)).Render(context.TODO(), w)
+	})
 
 	return r
 }

@@ -1,0 +1,17 @@
+package pages
+
+import "myapp/types"
+
+templ Home(user types.UserType) {
+	switch user {
+		case types.Guest:
+			<body>
+				<h1>Hello Guest</h1>
+				<a href="/login">Login</a>
+			</body>
+		case types.User:
+			<h1>Hello User</h1>
+		case types.Admin:
+			<h1>Hello Admin 1</h1>
+	}
+}
