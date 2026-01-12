@@ -1,2 +1,0 @@
-<h1>Hello Guest</h1><a href=\"/login\">Login</a>
-<h1>Hello User 1</h1>

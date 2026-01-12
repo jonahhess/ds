@@ -2,8 +2,8 @@ package pages
 
 import "myapp/types"
 
-templ Home(user types.UserType) {
-	switch user {
+templ Home(user types.User) {
+	switch user.Type {
 		case types.Guest:
 			<h1>Hello Guest</h1>
 			<a href="/login">Login</a>
