@@ -17,7 +17,6 @@ import (
 func SetupRoutes(sessionStore *sessions.CookieStore) *chi.Mux {
 	r := chi.NewRouter()
 
-	// --- core middleware ---
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
@@ -27,7 +26,6 @@ func SetupRoutes(sessionStore *sessions.CookieStore) *chi.Mux {
 
 	r.Use(middlewares.SessionMiddleware(sessionStore))
 
-	// --- routes ---
 	r.Route("/", func(r chi.Router) {
 		r.Get("/", home.HomeHandler)
 		r.Get("/about", about.AboutHandler)
@@ -35,7 +33,11 @@ func SetupRoutes(sessionStore *sessions.CookieStore) *chi.Mux {
 		r.Post("/login", login.LoginUserHandler)
 	})
 
-	// --- static files ---
+	//r.Group(func(r chi.Router) {
+	//r.Use(middlewares.AuthMiddleware)
+	//r.Get("/user", user.userHandler)
+	//})
+
 	r.Handle("/static/*",
 		http.StripPrefix("/static/",
 			http.FileServer(http.Dir("./static")),
