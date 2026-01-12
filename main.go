@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/gorilla/sessions"
-	"github.com/michaeljs1990/sqlitestore"
 
 	"myapp/db"
 	"myapp/router"
@@ -29,31 +28,16 @@ func main() {
 	if err := db.InitDB("db/myapp.db"); err != nil {
 		log.Fatalf("database init failed: %v", err)
 	}
-	db.CreateUsersTable()
-	db.CreateSessionsTable()
+	db.CreateTables()
+	defer db.CloseDB()
 
-	// --- sessions (SQLite-backed) ---
-	sessionStore, err := sqlitestore.NewSqliteStore(
-		"./db/myapp.db",  // SQLite file
-		"sessions",      // table name
-		"/",             // path
-		86400*30,        // max age
-		[]byte("dev-secret-change-me"),
+	var (
+		// key must be 16, 24 or 32 bytes long (AES-128, AES-192 or AES-256)
+		key   = []byte("super-secret-key")
+		store = sessions.NewCookieStore(key)
 	)
-	if err != nil {
-		log.Fatalf("session store init failed: %v", err)
-	}
-
-	sessionStore.Options = &sessions.Options{
-		Path:     "/",
-		MaxAge:   86400 * 30,
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
-		// Secure: true,
-	}
-
 	// --- router ---
-	r := router.SetupRoutes(ctx, sessionStore)
+	r := router.SetupRoutes(ctx, store)
 
 	// --- server ---
 	srv := &http.Server{

@@ -1,6 +1,18 @@
 package layouts
 
-import "myapp/components/navbar"
+import (
+	"context"
+	"myapp/components/navbar"
+	
+	"myapp/types"
+)
+
+func GetUser(ctx context.Context) string {
+	if theme, ok := ctx.Value("user").(string); ok {
+		return theme
+	}
+	return ""
+}
 
 templ Base(page string, content templ.Component) {
 	<!DOCTYPE html>
@@ -14,7 +26,7 @@ templ Base(page string, content templ.Component) {
 			@PageStyles(page)
 		</head>
 		<body>
-			@components.Navbar(1)
+			@components.Navbar(types.User{Type: types.LoggedInUser})
 			@content
 		</body>
 	</html>

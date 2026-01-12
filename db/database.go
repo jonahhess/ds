@@ -11,21 +11,28 @@ var DB *sql.DB
 
 // Initialize opens a SQLite database file
 func InitDB(path string) error {
-    var err error
-    DB, err = sql.Open("sqlite3", path)
-    if err != nil {
-        return err
-    }
+	var err error
+	DB, err = sql.Open("sqlite3", path)
+	if err != nil {
+		return err
+	}
 
-    // Optional: set pragmas for performance
-    DB.Exec("PRAGMA foreign_keys = ON;")
+	// Optional: set pragmas for performance
+	DB.Exec("PRAGMA foreign_keys = ON;")
 
-    return DB.Ping()
+	return DB.Ping()
+}
+
+func CloseDB() error {
+	if DB != nil {
+		return DB.Close()
+	}
+	return nil
 }
 
 // Example: create a users table
 func CreateTables() error {
-    query := `
+	query := `
     CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
@@ -33,13 +40,13 @@ func CreateTables() error {
         username TEXT
     );
     `
-    _, err := DB.Exec(query)
-    return err
+	_, err := DB.Exec(query)
+	return err
 }
 
 // Example: insert or update a user
 func UpsertUser(id, name, email, username string) error {
-    query := `
+	query := `
     INSERT INTO users (id, name, email, username)
     VALUES (?, ?, ?, ?)
     ON CONFLICT(id) DO UPDATE SET
@@ -47,19 +54,19 @@ func UpsertUser(id, name, email, username string) error {
         email=excluded.email,
         username=excluded.username;
     `
-    _, err := DB.Exec(query, id, name, email, username)
-    return err
+	_, err := DB.Exec(query, id, name, email, username)
+	return err
 }
 
 // Example: fetch a user by ID
 
 func GetUserByID(id string) (*types.User, error) {
-    u := &types.User{}
-    query := `SELECT id, name, email, username FROM users WHERE id = ?`
-    row := DB.QueryRow(query, id)
-    err := row.Scan(&u.ID, &u.Name, &u.Email, &u.Username)
-    if err != nil {
-        return nil, err
-    }
-    return u, nil
+	u := &types.User{}
+	query := `SELECT id, name, email, username FROM users WHERE id = ?`
+	row := DB.QueryRow(query, id)
+	err := row.Scan(&u.ID, &u.Name, &u.Email, &u.Username)
+	if err != nil {
+		return nil, err
+	}
+	return u, nil
 }
