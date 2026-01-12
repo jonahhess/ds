@@ -4,8 +4,10 @@ import (
 	"myapp/auth2"
 	"myapp/db"
 	"myapp/layouts"
-	"myapp/sessions"
+	"myapp/types"
 	"net/http"
+
+	"github.com/gorilla/sessions"
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -43,9 +45,9 @@ func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, _ := sessions.GetStore().Get(r, "auth")
-	session.Values["user_id"] = userID
-	session.Save(r, w)
+	sess := r.Context().Value(types.CtxKey(0)).(*sessions.Session)
+	sess.Values["user_id"] = userID
+	sess.Save(r, w)
 
 	w.WriteHeader(http.StatusOK)
 }
