@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gorilla/sessions"
+	"github.com/joho/godotenv"
 
 	"myapp/db"
 	"myapp/router"
@@ -28,25 +29,50 @@ func main() {
 	if err := db.InitDB("db/myapp.db"); err != nil {
 		log.Fatalf("database init failed: %v", err)
 	}
-	db.CreateTables()
+
+	if err := db.CreateTables(); err != nil {
+		log.Fatalf("table creation failed: %v", err)
+	}
+
 	defer db.CloseDB()
 
-	var (
-		// key must be 16, 24 or 32 bytes long (AES-128, AES-192 or AES-256)
-		key   = []byte("super-secret-key")
-		store = sessions.NewCookieStore(key)
+	var envs map[string]string
+	envs, err := godotenv.Read(".env")
+
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	authKey := envs["AUTH_KEY"]
+	encKey := envs["ENC_KEY"]
+
+	store := sessions.NewCookieStore(
+		[]byte(authKey),
+		[]byte(encKey),
 	)
+
+	store.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   86400 * 7,
+		HttpOnly: true,
+		Secure:   false, // false only for localhost
+		SameSite: http.SameSiteLaxMode,
+	}
+
 	// --- router ---
-	r := router.SetupRoutes(ctx, store)
+	r := router.SetupRoutes(store)
 
 	// --- server ---
 	srv := &http.Server{
-		Addr:    ":8080",
-		Handler: r,
+		Addr:         ":8088",
+		Handler:      r,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  60 * time.Second,
 	}
 
 	go func() {
-		fmt.Println("Server running on http://localhost:8080")
+		log.Println("server started on :8088")
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("server error: %v", err)
 		}
