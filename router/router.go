@@ -16,7 +16,6 @@ func SetupRoutes(
 
 	r := chi.NewRouter()
 
-	// ---- static files ----
 	r.Handle("/static/*",
 		http.StripPrefix("/static/",
 			http.FileServer(http.Dir("./static")),
@@ -37,7 +36,6 @@ func SetupRoutes(
 
 	// middleware: get cookie, store user
 
-	// ---- routes ----
 	r.Get("/", home.HomeHandler)
 
 	return r
