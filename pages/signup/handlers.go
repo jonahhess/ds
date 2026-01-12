@@ -19,10 +19,11 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func SignupUserHandler(w http.ResponseWriter, r *http.Request) {
+	name := r.FormValue("name")
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
-	if email == "" || password == "" {
+	if name == "" || email == "" || password == "" {
 		http.Error(w, "Missing fields", http.StatusBadRequest)
 		return
 	}
@@ -34,8 +35,8 @@ func SignupUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, err = db.DB.Exec(
-		"INSERT INTO users (email, password_hash) VALUES (?, ?)",
-		email, hash,
+		"INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
+		name, email, hash,
 	)
 	if err != nil {
 		http.Error(w, "Email already exists", 400)
