@@ -11,7 +11,7 @@ import (
 
 	"myapp/db"
 	"myapp/router"
-	"myapp/sessions"
+	sessions "myapp/sessionStore"
 )
 
 func main() {
@@ -29,7 +29,7 @@ func main() {
 	}
 
 	if err := db.CreateTables(); err != nil {
-		log.Fatalf("table creation failed: %v", err)
+		log.Printf("table creation failed: %v", err)
 	}
 
 	defer db.CloseDB()
