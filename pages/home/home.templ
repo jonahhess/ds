@@ -1,9 +1,12 @@
 package home
 
-import "myapp/types"
+import (
+	"myapp/types"
+	utils "myapp/utils"
+	)
 
-templ Home(user types.User) {
-	switch user.Type {
+templ Home() {
+	switch utils.GetUserTypeFromContext(ctx) {
 		case types.Guest:
 			<h1>Hello Guest</h1>
 			<a href="/login">Login</a>
