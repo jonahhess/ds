@@ -1,9 +1,12 @@
 package template
 
-import "myapp/types"
+import (
+	"myapp/types"
+	"myapp/utils"
+)
 
-templ Template(user types.User) {
-	switch user.Type {
+templ Template() {
+	switch utils.GetUserTypeFromContext(ctx) {
 		case types.Guest:
 			<h1>Template Guest</h1>
 			<a href="/login">Login</a>

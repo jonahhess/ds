@@ -2,14 +2,13 @@ package template
 
 import (
 	"myapp/layouts"
-	"myapp/types"
 	"net/http"
 )
 
 func TemplateHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := layouts.
-		Base("Template", Template(types.User{})).
+		Base("Template", Template()).
 		Render(r.Context(), w)
 
 	if err != nil {
