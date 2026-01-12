@@ -1,23 +1,22 @@
 package router
 
 import (
-	"context"
-	home "myapp/pages/home"
 	"net/http"
 	"time"
+
+	middlewares "myapp/middlewares"
+	about "myapp/pages/about"
+	home "myapp/pages/home"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/gorilla/sessions"
 )
 
-func SetupRoutes(
-	appCtx context.Context,
-	sessionStore *sessions.CookieStore,
-) *chi.Mux {
-
+func SetupRoutes(sessionStore *sessions.CookieStore) *chi.Mux {
 	r := chi.NewRouter()
 
+	// --- core middleware ---
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
@@ -25,6 +24,15 @@ func SetupRoutes(
 
 	r.Use(middleware.Timeout(60 * time.Second))
 
+	r.Use(middlewares.SessionMiddleware(sessionStore))
+
+	// --- routes ---
+	r.Route("/", func(r chi.Router) {
+		r.Get("/", home.HomeHandler)
+		r.Get("/about", about.AboutHandler)
+	})
+
+	// --- static files ---
 	r.Handle("/static/*",
 		http.StripPrefix("/static/",
 			http.FileServer(http.Dir("./static")),
@@ -42,10 +50,6 @@ func SetupRoutes(
 			http.FileServer(http.Dir("./components")),
 		),
 	)
-
-	// middleware: get cookie, store user
-
-	r.Get("/", home.HomeHandler)
 
 	return r
 }
