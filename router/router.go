@@ -2,11 +2,8 @@ package router
 
 import (
 	"context"
-	"net/http"
-
-	"myapp/layouts"
 	home "myapp/pages/home"
-	"myapp/types"
+	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/sessions"
@@ -38,26 +35,10 @@ func SetupRoutes(
 		),
 	)
 
+	// middleware: get cookie, store user
+
 	// ---- routes ----
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		// example session usage
-		session, _ := sessionStore.Get(r, "myapp")
-
-		userType, ok := session.Values["userType"].(types.UserType)
-		if !ok {
-			userType = types.UserType(0)
-			session.Values["userType"] = userType
-		}
-		_ = session.Save(r, w)
-
-		err := layouts.
-			Base("Home", home.Home(userType)).
-			Render(r.Context(), w)
-
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-	})
+	r.Get("/", home.HomeHandler)
 
 	return r
 }

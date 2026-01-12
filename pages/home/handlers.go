@@ -6,10 +6,10 @@ import (
 	"net/http"
 )
 
-func HandleomeHandler(w http.ResponseWriter, r *http.Request) {
+func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := layouts.
-		Base("Home", Home(types.User)).
+		Base("Home", Home(types.User{})).
 		Render(r.Context(), w)
 
 	if err != nil {
