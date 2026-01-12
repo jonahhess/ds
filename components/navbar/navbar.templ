@@ -1,12 +1,13 @@
 package components
 
 import "myapp/types"
+import "myapp/utils"
 
-func GetUserLinks(user types.User) []types.Link {
+func GetUserLinks(userType types.UserType) []types.Link {
 	home := types.Link{Href: "/", Title: "Home"}
 	var links []types.Link
 
-	switch user.Type {
+	switch userType {
 	case types.Guest:
 		login := types.Link{Href: "/login", Title: "Log In"}
 		signup := types.Link{Href: "/signup", Title: "Sign Up"}
@@ -20,9 +21,9 @@ func GetUserLinks(user types.User) []types.Link {
 	return links
 }
 
-templ Navbar(user types.User) {
+templ Navbar() {
 	<header class="navbar">
-		for _, l := range GetUserLinks(user) {
+		for _, l := range GetUserLinks(utils.GetUserTypeFromContext(ctx)) {
 			<a class="navbar-element" href={ templ.SafeURL(l.Href) }>{ l.Title }</a>
 		}
 	</header>

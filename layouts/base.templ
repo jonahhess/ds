@@ -3,13 +3,11 @@ package layouts
 import (
 	"context"
 	"myapp/components/navbar"
-	
-	"myapp/types"
 )
 
 func GetUser(ctx context.Context) string {
-	if theme, ok := ctx.Value("user").(string); ok {
-		return theme
+	if user, ok := ctx.Value("user").(string); ok {
+		return user
 	}
 	return ""
 }
@@ -26,7 +24,7 @@ templ Base(page string, content templ.Component) {
 			@PageStyles(page)
 		</head>
 		<body>
-			@components.Navbar(types.User{Type: types.LoggedInUser})
+			@components.Navbar()
 			@content
 		</body>
 	</html>
