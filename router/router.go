@@ -7,6 +7,7 @@ import (
 	middlewares "myapp/middlewares"
 	about "myapp/pages/about"
 	home "myapp/pages/home"
+	"myapp/pages/login"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -30,6 +31,8 @@ func SetupRoutes(sessionStore *sessions.CookieStore) *chi.Mux {
 	r.Route("/", func(r chi.Router) {
 		r.Get("/", home.HomeHandler)
 		r.Get("/about", about.AboutHandler)
+		r.Get("/login", login.LoginHandler)
+		r.Post("/login", login.LoginUserHandler)
 	})
 
 	// --- static files ---
