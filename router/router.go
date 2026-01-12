@@ -8,6 +8,7 @@ import (
 	about "myapp/pages/about"
 	home "myapp/pages/home"
 	"myapp/pages/login"
+	"myapp/pages/logout"
 	"myapp/pages/signup"
 
 	"github.com/go-chi/chi/v5"
@@ -34,6 +35,8 @@ func SetupRoutes(sessionStore *sessions.CookieStore) *chi.Mux {
 		r.Post("/login", login.LoginUserHandler)
 		r.Get("/signup", signup.SignupHandler)
 		r.Post("/signup", signup.SignupUserHandler)
+		r.Get("/logout", logout.LogoutHandler)
+		r.Post("/logout", logout.LogoutUserHandler)
 	})
 
 	//r.Group(func(r chi.Router) {
