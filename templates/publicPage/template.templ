@@ -1,0 +1,13 @@
+package template
+
+import "myapp/types"
+
+templ Template(user types.User) {
+	switch user.Type {
+		case types.Guest:
+			<h1>Template Guest</h1>
+			<a href="/login">Login</a>
+		case types.LoggedInUser:
+			<h1>Template User</h1>
+	}
+}
