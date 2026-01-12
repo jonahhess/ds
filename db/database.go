@@ -2,7 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"myapp/types"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -30,43 +29,15 @@ func CloseDB() error {
 	return nil
 }
 
-// Example: create a users table
 func CreateTables() error {
 	query := `
-    CREATE TABLE IF NOT EXISTS users (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        email TEXT NOT NULL,
-        username TEXT
-    );
+	CREATE TABLE users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
     `
 	_, err := DB.Exec(query)
 	return err
-}
-
-// Example: insert or update a user
-func UpsertUser(id, name, email, username string) error {
-	query := `
-    INSERT INTO users (id, name, email, username)
-    VALUES (?, ?, ?, ?)
-    ON CONFLICT(id) DO UPDATE SET
-        name=excluded.name,
-        email=excluded.email,
-        username=excluded.username;
-    `
-	_, err := DB.Exec(query, id, name, email, username)
-	return err
-}
-
-// Example: fetch a user by ID
-
-func GetUserByID(id string) (*types.User, error) {
-	u := &types.User{}
-	query := `SELECT id, name, email, username FROM users WHERE id = ?`
-	row := DB.QueryRow(query, id)
-	err := row.Scan(&u.ID, &u.Name, &u.Email, &u.Username)
-	if err != nil {
-		return nil, err
-	}
-	return u, nil
 }
