@@ -9,11 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gorilla/sessions"
-	"github.com/joho/godotenv"
-
 	"myapp/db"
 	"myapp/router"
+	"myapp/sessions"
 )
 
 func main() {
@@ -36,31 +34,8 @@ func main() {
 
 	defer db.CloseDB()
 
-	var envs map[string]string
-	envs, err := godotenv.Read(".env")
-
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
-	authKey := envs["AUTH_KEY"]
-	encKey := envs["ENC_KEY"]
-
-	store := sessions.NewCookieStore(
-		[]byte(authKey),
-		[]byte(encKey),
-	)
-
-	store.Options = &sessions.Options{
-		Path:     "/",
-		MaxAge:   86400 * 7,
-		HttpOnly: true,
-		Secure:   false, // false only for localhost
-		SameSite: http.SameSiteLaxMode,
-	}
-
 	// --- router ---
-	r := router.SetupRoutes(store)
+	r := router.SetupRoutes(sessions.InitStore())
 
 	// --- server ---
 	srv := &http.Server{
