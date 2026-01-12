@@ -23,7 +23,7 @@ func GetUserLinks(user types.UserType) []types.Link {
 templ Navbar(user types.UserType) {
 	<header>
 		for _, l := range GetUserLinks(user) {
-			<a href={ l.Href }>{ l.Title }</a>
+			<a href={  templ.SafeURL(l.Href) }>{ l.Title }</a>
 		}
 	</header>
 }
