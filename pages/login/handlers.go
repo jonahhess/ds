@@ -1,6 +1,7 @@
 package login
 
 import (
+	"log"
 	"myapp/auth2"
 	"myapp/db"
 	"myapp/layouts"
@@ -34,22 +35,25 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	).Scan(&userID, &hash)
 
 	if err != nil {
+		http.Error(w, "Invalid email", http.StatusUnauthorized)
 		return
 	}
 
 	if err := auth2.CheckPassword(password, hash); err != nil {
+		http.Error(w, "Invalid password", http.StatusUnauthorized)
 		return
 	}
 
 	sess, ok := utils.SessionFromContext(r.Context())
 	if !ok {
+		http.Error(w, "Failed to get session", http.StatusInternalServerError)
 		return
 	}
 
 	sess.Values["user_id"] = userID
 
-	// IMPORTANT: save BEFORE writing response
 	if err := sess.Save(r, w); err != nil {
+		log.Printf("session save error: %v", err)
 		http.Error(w, "Failed to save session", http.StatusInternalServerError)
 		return
 	}
