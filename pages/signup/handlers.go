@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func SignupHandler(w http.ResponseWriter, r *http.Request) {
+func Page(w http.ResponseWriter, r *http.Request) {
 
 	err := layouts.
 		Base("Signup", Signup()).
@@ -18,7 +18,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func SignupUserHandler(w http.ResponseWriter, r *http.Request) {
+func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("name")
 	email := r.FormValue("email")
 	password := r.FormValue("password")

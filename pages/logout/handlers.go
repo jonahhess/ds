@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/sessions"
 )
 
-func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+func Page(w http.ResponseWriter, r *http.Request) {
 
 	err := layouts.
 		Base("Logout", Logout()).
@@ -19,7 +19,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func LogoutUserHandler(w http.ResponseWriter, r *http.Request) {
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	session := r.Context().Value(types.CtxKey(0)).(*sessions.Session)
 	session.Options.MaxAge = -1

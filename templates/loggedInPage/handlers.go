@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func TemplateHandler(w http.ResponseWriter, r *http.Request) {
+func Page(w http.ResponseWriter, r *http.Request) {
 
 	err := layouts.
 		Base("Template", Template()).

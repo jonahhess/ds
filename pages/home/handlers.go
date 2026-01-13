@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func HomeHandler(w http.ResponseWriter, r *http.Request) {
+func Page(w http.ResponseWriter, r *http.Request) {
 
 	err := layouts.
 		Base("Home", Home()).

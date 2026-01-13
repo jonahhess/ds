@@ -29,14 +29,14 @@ func SetupRoutes(sessionStore *sessions.CookieStore) *chi.Mux {
 	r.Use(middlewares.SessionMiddleware(sessionStore))
 
 	r.Route("/", func(r chi.Router) {
-		r.Get("/", home.HomeHandler)
-		r.Get("/about", about.AboutHandler)
-		r.Get("/login", login.LoginHandler)
+		r.Get("/", home.Page)
+		r.Get("/about", about.Page)
+		r.Get("/login", login.Page)
 		r.Post("/login", login.LoginUserHandler)
-		r.Get("/signup", signup.SignupHandler)
-		r.Post("/signup", signup.SignupUserHandler)
-		r.Get("/logout", logout.LogoutHandler)
-		r.Post("/logout", logout.LogoutUserHandler)
+		r.Get("/signup", signup.Page)
+		r.Post("/signup", signup.SignupHandler)
+		r.Get("/logout", logout.Page)
+		r.Post("/logout", logout.LogoutHandler)
 	})
 
 	//r.Group(func(r chi.Router) {
