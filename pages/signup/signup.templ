@@ -10,20 +10,29 @@ type UserSignup struct {
 	Password     string
 }
 
+
+
 templ Signup() {
 	if utils.IsLoggedIn(ctx) {
 		<h1>You are logged in!</h1>
 	} else {
 		<h1>Signup</h1>
-		<form>
+		<form action="/signup" method="post">
 		<label for="name">Name</label>
 		<input name="name" type="text" required />
 		<label for="email">Email</label>
 		<input type="text" name="email" required>
 		<label for="password">Password</label>
 		<input type="text" name="password" required>
-		<button type="submit" data-on:click="@post('/signup', {contentType: 'form'})">Submit</button>
-		<p id="error"></p>
+		<button type="submit">Submit</button>
 		</form>
 	}
+
+        {{flashes := utils.FlashesFromContext(ctx)}}
+
+    if len(flashes) > 0 {
+        <div class="error">
+            { flashes[0].(string) }
+        </div>
+    }
 }

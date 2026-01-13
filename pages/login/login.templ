@@ -18,4 +18,18 @@ templ Login() {
 			<p id="error"></p>
 		</form>
 	}
+
+	{{
+        sess, ok := utils.SessionFromContext(ctx)
+        var flashes []any
+        if ok {
+            flashes = sess.Flashes()
+        }
+    }}
+
+    if len(flashes) > 0 {
+        <div class="error">
+            { flashes[0].(string) }
+        </div>
+    }
 }

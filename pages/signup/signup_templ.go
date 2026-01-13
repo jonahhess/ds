@@ -45,7 +45,27 @@ func Signup() templ.Component {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<h1>Signup</h1><form><label for=\"name\">Name</label> <input name=\"name\" type=\"text\" required> <label for=\"email\">Email</label> <input type=\"text\" name=\"email\" required> <label for=\"password\">Password</label> <input type=\"text\" name=\"password\" required> <button type=\"submit\" data-on:click=\"@post('/signup', {contentType: 'form'})\">Submit</button><p id=\"error\"></p></form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<h1>Signup</h1><form action=\"/signup\" method=\"post\"><label for=\"name\">Name</label> <input name=\"name\" type=\"text\" required> <label for=\"email\">Email</label> <input type=\"text\" name=\"email\" required> <label for=\"password\">Password</label> <input type=\"text\" name=\"password\" required> <button type=\"submit\">Submit</button></form>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		flashes := utils.FlashesFromContext(ctx)
+		if len(flashes) > 0 {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"error\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var2 string
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(flashes[0].(string))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/signup/signup.templ`, Line: 35, Col: 33}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
