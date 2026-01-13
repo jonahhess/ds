@@ -26,6 +26,7 @@ func SetupRoutes(sessionStore *sessions.CookieStore) *chi.Mux {
 	//r.Use(middleware.Timeout(60 * time.Second))
 
 	r.Use(middlewares.SessionMiddleware(sessionStore))
+	r.Use(middlewares.FlashMiddleware)
 	r.Use(middlewares.SessionSaver)
 
 	r.Route("/", func(r chi.Router) {
