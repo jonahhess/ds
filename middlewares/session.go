@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"context"
+	"myapp/utils"
 	"net/http"
 
 	"github.com/gorilla/sessions"
@@ -16,7 +17,7 @@ func SessionMiddleware(store *sessions.CookieStore) func(http.Handler) http.Hand
 				session, _ = store.New(r, "myapp-session")
 			}
 
-			ctx := context.WithValue(r.Context(), "session-key", session)
+			ctx := context.WithValue(r.Context(), utils.SessionContextKey, session)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
