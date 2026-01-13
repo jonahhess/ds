@@ -19,16 +19,10 @@ templ Login() {
 		</form>
 	}
 
-	{{
-        sess, ok := utils.SessionFromContext(ctx)
-        var flashes []any
-        if ok {
-            flashes = sess.Flashes()
-        }
-    }}
+	{{ flashes := utils.Flashes(ctx) }}
 
     if len(flashes) > 0 {
-        <div class="error">
+        <div data-init__delay.2s="@get('/login')" class="error">
             { flashes[0].(string) }
         </div>
     }
