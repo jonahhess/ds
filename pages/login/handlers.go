@@ -35,12 +35,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	).Scan(&userID, &hash)
 
 	if err != nil {
-		http.Error(w, "Invalid email", http.StatusUnauthorized)
+		http.Error(w, "Invalid Credentials", http.StatusUnauthorized)
 		return
 	}
 
 	if err := auth2.CheckPassword(password, hash); err != nil {
-		http.Error(w, "Invalid password", http.StatusUnauthorized)
+		http.Error(w, "Invalid Credentials", http.StatusUnauthorized)
 		return
 	}
 
