@@ -3,11 +3,11 @@ package router
 import (
 	"net/http"
 
+	"myapp/components/navbar"
 	middlewares "myapp/middlewares"
 	about "myapp/pages/about"
 	home "myapp/pages/home"
 	"myapp/pages/login"
-	"myapp/pages/logout"
 	"myapp/pages/notFound"
 	"myapp/pages/signup"
 
@@ -34,8 +34,7 @@ func SetupRoutes(sessionStore *sessions.CookieStore) *chi.Mux {
 		r.Post("/login", login.LoginHandler)
 		r.Get("/signup", signup.Page)
 		r.Post("/signup", signup.SignupHandler)
-		r.Get("/logout", logout.Page)
-		r.Post("/logout", logout.LogoutHandler)
+		r.Post("/logout", navbar.LogoutHandler)
 	})
 
 	//r.Group(func(r chi.Router) {

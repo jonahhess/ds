@@ -7,7 +7,11 @@ import (
 )
 
 func IsLoggedIn(ctx context.Context) bool {
-	userID, ok := ctx.Value("user-id").(int)
+	session, ok := SessionFromContext(ctx)
+	if !ok {
+		return false
+	}
+	userID, ok := session.Values["user_id"].(int)
 	if !ok {
 		return false
 	}
