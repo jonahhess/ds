@@ -9,6 +9,7 @@ import (
 	home "myapp/pages/home"
 	"myapp/pages/login"
 	"myapp/pages/logout"
+	"myapp/pages/notFound"
 	"myapp/pages/signup"
 
 	"github.com/go-chi/chi/v5"
@@ -61,6 +62,8 @@ func SetupRoutes(sessionStore *sessions.CookieStore) *chi.Mux {
 			http.FileServer(http.Dir("./components")),
 		),
 	)
+
+	r.NotFound(notFound.Page)
 
 	return r
 }
