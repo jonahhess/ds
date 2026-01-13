@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/sessions"
+	"github.com/starfederation/datastar-go/datastar"
 )
 
 func Page(w http.ResponseWriter, r *http.Request) {
@@ -35,13 +36,14 @@ func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 		email,
 	).Scan(&userID, &hash)
 
+	sse := datastar.NewSSE(w, r)
 	if err != nil {
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		sse.PatchElements(`<p id="error">Invalid Credentials</p>`)
 		return
 	}
 
 	if err := auth2.CheckPassword(password, hash); err != nil {
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		sse.PatchElements(`<p id="error">Invalid Credentials</p>`)
 		return
 	}
 
@@ -49,5 +51,5 @@ func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 	sess.Values["user_id"] = userID
 	sess.Save(r, w)
 
-	w.WriteHeader(http.StatusOK)
+	sse.Redirect("/")
 }

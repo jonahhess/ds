@@ -5,6 +5,8 @@ import (
 	"myapp/db"
 	"myapp/layouts"
 	"net/http"
+
+	"github.com/starfederation/datastar-go/datastar"
 )
 
 func Page(w http.ResponseWriter, r *http.Request) {
@@ -23,14 +25,16 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
+	sse := datastar.NewSSE(w, r)
+
 	if name == "" || email == "" || password == "" {
-		http.Error(w, "Missing fields", http.StatusBadRequest)
+		sse.PatchElements(`<p id="error">Invalid Credentials</p>`)
 		return
 	}
 
 	hash, err := auth2.HashPassword(password)
 	if err != nil {
-		http.Error(w, "Server error", 500)
+		sse.PatchElements(`<p id="error">Invalid Credentials</p>`)
 		return
 	}
 
@@ -43,5 +47,5 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	sse.Redirect("/")
 }

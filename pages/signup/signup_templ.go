@@ -42,7 +42,7 @@ func Signup() templ.Component {
 		ctx = templ.ClearChildren(ctx)
 		switch utils.GetUserTypeFromContext(ctx) {
 		case types.Guest:
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1>Signup</h1><form action=\"/signup\" method=\"post\"><label for=\"name\">Name</label> <input name=\"name\" type=\"text\" required> <label for=\"email\">Email</label> <input type=\"text\" name=\"email\" required> <label for=\"password\">Password</label> <input type=\"text\" name=\"password\" required> <button type=\"submit\">Submit</button></form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1>Signup</h1><form><label for=\"name\">Name</label> <input name=\"name\" type=\"text\" required> <label for=\"email\">Email</label> <input type=\"text\" name=\"email\" required> <label for=\"password\">Password</label> <input type=\"text\" name=\"password\" required> <button type=\"submit\" data-on:click=\"@post('/signup', {contentType: 'form'})\">Submit</button><p id=\"error\"></p></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
