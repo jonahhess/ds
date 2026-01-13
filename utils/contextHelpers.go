@@ -15,6 +15,6 @@ func IsLoggedIn(ctx context.Context) bool {
 }
 
 func SessionFromContext(ctx context.Context) (*sessions.Session, bool) {
-	session, ok := ctx.Value("myapp-session").(*sessions.Session)
+	session, ok := ctx.Value("session-key").(*sessions.Session)
 	return session, ok
 }
