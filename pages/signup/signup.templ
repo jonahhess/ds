@@ -28,7 +28,7 @@ templ Signup() {
 		</form>
 	}
 
-        {{flashes := utils.FlashesFromContext(ctx)}}
+	{{ flashes := utils.Flashes(ctx) }}
 
     if len(flashes) > 0 {
         <div class="error">
