@@ -6,7 +6,7 @@ import (
 	"myapp/layouts"
 	"net/http"
 
-	"github.com/starfederation/datastar-go/datastar"
+	"myapp/utils"
 )
 
 func Page(w http.ResponseWriter, r *http.Request) {
@@ -17,6 +17,7 @@ func Page(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -25,16 +26,24 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
-	sse := datastar.NewSSE(w, r)
+	sess, ok := utils.SessionFromContext(r.Context())
+	if !ok {
+		http.Error(w, "Failed to get session", http.StatusInternalServerError)
+		return
+	}
 
 	if name == "" || email == "" || password == "" {
-		sse.PatchElements(`<p id="error">Invalid Credentials</p>`)
+		sess.AddFlash("Invalid email or password")
+		sess.Save(r, w)
+		http.Redirect(w, r, "/signup", http.StatusSeeOther)
 		return
 	}
 
 	hash, err := auth2.HashPassword(password)
 	if err != nil {
-		sse.PatchElements(`<p id="error">Invalid Credentials</p>`)
+		sess.AddFlash("Invalid email or password")
+		sess.Save(r, w)
+		http.Redirect(w, r, "/signup", http.StatusSeeOther)
 		return
 	}
 
@@ -43,9 +52,11 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		name, email, hash,
 	)
 	if err != nil {
-		http.Error(w, "Email already exists", 400)
+		sess.AddFlash("email already exists")
+		sess.Save(r, w)
+		http.Redirect(w, r, "/signup", http.StatusSeeOther)
 		return
 	}
 
-	sse.Redirect("/")
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
