@@ -54,7 +54,7 @@ func Base(page string, content templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0\"><link rel=\"stylesheet\" href=\"static/reset.css\"><script defer type=\"module\" src=\"static/datastar.js\"></script><link rel=\"stylesheet\" href=\"static/components/navbar/navbar.css\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0\"><link rel=\"stylesheet\" href=\"/static/reset.css\"><script defer type=\"module\" src=\"/static/datastar.js\"></script><link rel=\"stylesheet\" href=\"/static/components/navbar/navbar.css\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
