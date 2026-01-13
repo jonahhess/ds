@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"myapp/utils"
@@ -16,7 +15,6 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
-		fmt.Println("AuthMiddleware - Session values:", sess.Values)
 
 		userID, ok := sess.Values["user_id"].(int)
 
