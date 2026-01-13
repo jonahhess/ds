@@ -50,7 +50,7 @@ func Signup() templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		flashes := utils.FlashesFromContext(ctx)
+		flashes := utils.Flashes(ctx)
 		if len(flashes) > 0 {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"error\">")
 			if templ_7745c5c3_Err != nil {
