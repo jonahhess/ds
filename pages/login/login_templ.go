@@ -9,7 +9,6 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"myapp/types"
 	"myapp/utils"
 )
 
@@ -34,14 +33,13 @@ func Login() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		switch utils.GetUserTypeFromContext(ctx) {
-		case types.Guest:
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1>Login Guest</h1><form><label for=\"email\">Email</label> <input name=\"email\" type=\"email\" required> <label for=\"password\">Password</label> <input name=\"password\" type=\"text\" required> <button type=\"submit\" data-on:click=\"@post('/login', {contentType: 'form'})\">Submit</button><p id=\"error\"></p></form>")
+		if utils.IsLoggedIn(ctx) {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1>You are logged in!</h1>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case types.LoggedInUser:
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<h1>You are already logged in!</h1>")
+		} else {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<h1>Login Guest</h1><form action=\"/login\" method=\"post\"><label for=\"email\">Email</label> <input name=\"email\" type=\"email\" required> <label for=\"password\">Password</label> <input name=\"password\" type=\"text\" required> <button type=\"submit\">Submit</button><p id=\"error\"></p></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

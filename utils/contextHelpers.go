@@ -2,21 +2,19 @@ package utils
 
 import (
 	"context"
-	"myapp/types"
 
 	"github.com/gorilla/sessions"
 )
 
-func GetUserTypeFromContext(ctx context.Context) types.UserType {
-	user, ok := ctx.Value("user").(types.User)
+func IsLoggedIn(ctx context.Context) bool {
+	userID, ok := ctx.Value("user-id").(int)
 	if !ok {
-		return types.Guest
+		return false
 	}
-	userType := user.Type
-	return userType
+	return userID != 0
 }
 
 func SessionFromContext(ctx context.Context) (*sessions.Session, bool) {
-	session, ok := ctx.Value(types.CtxKey(0)).(*sessions.Session)
+	session, ok := ctx.Value("myapp-session").(*sessions.Session)
 	return session, ok
 }

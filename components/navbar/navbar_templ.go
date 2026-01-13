@@ -11,16 +11,15 @@ import templruntime "github.com/a-h/templ/runtime"
 import "myapp/types"
 import "myapp/utils"
 
-func GetUserLinks(userType types.UserType) []types.Link {
+func GetUserLinks(isLoggedIn bool) []types.Link {
 	home := types.Link{Href: "/", Title: "Home"}
 	var links []types.Link
 
-	switch userType {
-	case types.Guest:
+	if !isLoggedIn {
 		login := types.Link{Href: "/login", Title: "Log In"}
 		signup := types.Link{Href: "/signup", Title: "Sign Up"}
 		links = []types.Link{home, login, signup}
-	case types.LoggedInUser:
+	} else {
 		profile := types.Link{Href: "/about", Title: "About"}
 		logout := types.Link{Href: "/logout", Title: "Logout"}
 		links = []types.Link{home, profile, logout}
@@ -54,7 +53,7 @@ func Navbar() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for _, l := range GetUserLinks(utils.GetUserTypeFromContext(ctx)) {
+		for _, l := range GetUserLinks(utils.IsLoggedIn(ctx)) {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<a class=\"navbar-element\" href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -62,7 +61,7 @@ func Navbar() templ.Component {
 			var templ_7745c5c3_Var2 templ.SafeURL
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(l.Href))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/navbar/navbar.templ`, Line: 27, Col: 57}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/navbar/navbar.templ`, Line: 26, Col: 57}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -75,7 +74,7 @@ func Navbar() templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(l.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/navbar/navbar.templ`, Line: 27, Col: 69}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/navbar/navbar.templ`, Line: 26, Col: 69}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {

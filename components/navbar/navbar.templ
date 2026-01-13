@@ -3,16 +3,15 @@ package components
 import "myapp/types"
 import "myapp/utils"
 
-func GetUserLinks(userType types.UserType) []types.Link {
+func GetUserLinks(isLoggedIn bool) []types.Link {
 	home := types.Link{Href: "/", Title: "Home"}
 	var links []types.Link
 
-	switch userType {
-	case types.Guest:
+	if !isLoggedIn {
 		login := types.Link{Href: "/login", Title: "Log In"}
 		signup := types.Link{Href: "/signup", Title: "Sign Up"}
 		links = []types.Link{home, login, signup}
-	case types.LoggedInUser:
+	} else {
 		profile := types.Link{Href: "/about", Title: "About"}
 		logout := types.Link{Href: "/logout", Title: "Logout"}
 		links = []types.Link{home, profile, logout}
@@ -23,7 +22,7 @@ func GetUserLinks(userType types.UserType) []types.Link {
 
 templ Navbar() {
 	<header class="navbar">
-		for _, l := range GetUserLinks(utils.GetUserTypeFromContext(ctx)) {
+		for _, l := range GetUserLinks(utils.IsLoggedIn(ctx)) {
 			<a class="navbar-element" href={ templ.SafeURL(l.Href) }>{ l.Title }</a>
 		}
 	</header>

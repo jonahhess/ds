@@ -2,7 +2,6 @@ package router
 
 import (
 	"net/http"
-	"time"
 
 	middlewares "myapp/middlewares"
 	about "myapp/pages/about"
@@ -13,19 +12,18 @@ import (
 	"myapp/pages/signup"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/gorilla/sessions"
 )
 
 func SetupRoutes(sessionStore *sessions.CookieStore) *chi.Mux {
 	r := chi.NewRouter()
 
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
+	//r.Use(middleware.RequestID)
+	//r.Use(middleware.RealIP)
+	//r.Use(middleware.Logger)
+	//r.Use(middleware.Recoverer)
 
-	r.Use(middleware.Timeout(60 * time.Second))
+	//r.Use(middleware.Timeout(60 * time.Second))
 
 	r.Use(middlewares.SessionMiddleware(sessionStore))
 
@@ -33,7 +31,7 @@ func SetupRoutes(sessionStore *sessions.CookieStore) *chi.Mux {
 		r.Get("/", home.Page)
 		r.Get("/about", about.Page)
 		r.Get("/login", login.Page)
-		r.Post("/login", login.LoginUserHandler)
+		r.Post("/login", login.LoginHandler)
 		r.Get("/signup", signup.Page)
 		r.Post("/signup", signup.SignupHandler)
 		r.Get("/logout", logout.Page)

@@ -1,16 +1,13 @@
 package logout
 
 import (
-	"myapp/types"
 	"myapp/utils"
 )
 
 templ Logout() {
-	switch utils.GetUserTypeFromContext(ctx) {
-		case types.Guest:
-			<h1>Logout Guest</h1>
-			<a href="/login">Login</a>
-		case types.LoggedInUser:
-			<h1>Logout User</h1>
+	if utils.IsLoggedIn(ctx) {
+		<h1>Logout Guest</h1>
+	} else {
+		<h1>Logout User</h1>
 	}
 }

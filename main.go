@@ -15,7 +15,6 @@ import (
 )
 
 func main() {
-	// --- root context (ctrl+c / docker stop) ---
 	ctx, stop := signal.NotifyContext(
 		context.Background(),
 		syscall.SIGINT,
@@ -23,7 +22,6 @@ func main() {
 	)
 	defer stop()
 
-	// --- database ---
 	if err := db.InitDB("db/myapp.db"); err != nil {
 		log.Fatalf("database init failed: %v", err)
 	}
@@ -34,8 +32,8 @@ func main() {
 
 	defer db.CloseDB()
 
-	// --- router ---
-	r := router.SetupRoutes(sessions.InitStore())
+	sess := sessions.InitStore()
+	r := router.SetupRoutes(sess)
 
 	// --- server ---
 	srv := &http.Server{
@@ -53,7 +51,6 @@ func main() {
 		}
 	}()
 
-	// --- graceful shutdown ---
 	<-ctx.Done()
 	fmt.Println("\nShutting down...")
 

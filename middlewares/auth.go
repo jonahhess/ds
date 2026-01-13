@@ -2,17 +2,22 @@ package middlewares
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
-	"myapp/types"
-
-	"github.com/gorilla/sessions"
+	"myapp/utils"
 )
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		sess := r.Context().Value(types.CtxKey(0)).(*sessions.Session)
+		sess, ok := utils.SessionFromContext(r.Context())
+		if !ok {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		fmt.Println("AuthMiddleware - Session values:", sess.Values)
+
 		userID, ok := sess.Values["user_id"].(int)
 
 		if !ok || userID == 0 {

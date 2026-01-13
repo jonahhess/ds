@@ -2,10 +2,8 @@ package logout
 
 import (
 	"myapp/layouts"
-	"myapp/types"
+	"myapp/utils"
 	"net/http"
-
-	"github.com/gorilla/sessions"
 )
 
 func Page(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +19,11 @@ func Page(w http.ResponseWriter, r *http.Request) {
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
-	session := r.Context().Value(types.CtxKey(0)).(*sessions.Session)
+	session, ok := utils.SessionFromContext(r.Context())
+	if !ok {
+		http.Error(w, "Failed to retrieve session", http.StatusInternalServerError)
+		return
+	}
 	session.Options.MaxAge = -1
 	session.Save(r, w)
 

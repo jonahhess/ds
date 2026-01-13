@@ -4,11 +4,8 @@ import (
 	"myapp/auth2"
 	"myapp/db"
 	"myapp/layouts"
-	"myapp/types"
+	"myapp/utils"
 	"net/http"
-
-	"github.com/gorilla/sessions"
-	"github.com/starfederation/datastar-go/datastar"
 )
 
 func Page(w http.ResponseWriter, r *http.Request) {
@@ -22,7 +19,7 @@ func Page(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
@@ -36,20 +33,26 @@ func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 		email,
 	).Scan(&userID, &hash)
 
-	sse := datastar.NewSSE(w, r)
 	if err != nil {
-		sse.PatchElements(`<p id="error">Invalid Credentials</p>`)
 		return
 	}
 
 	if err := auth2.CheckPassword(password, hash); err != nil {
-		sse.PatchElements(`<p id="error">Invalid Credentials</p>`)
 		return
 	}
 
-	sess := r.Context().Value(types.CtxKey(0)).(*sessions.Session)
-	sess.Values["user_id"] = userID
-	sess.Save(r, w)
+	sess, ok := utils.SessionFromContext(r.Context())
+	if !ok {
+		return
+	}
 
-	sse.Redirect("/")
+	sess.Values["user_id"] = userID
+
+	// IMPORTANT: save BEFORE writing response
+	if err := sess.Save(r, w); err != nil {
+		http.Error(w, "Failed to save session", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

@@ -1,23 +1,21 @@
 package login
 
 import (
-	"myapp/types"
 	"myapp/utils"
 )
 
 templ Login() {
-	switch utils.GetUserTypeFromContext(ctx) {
-		case types.Guest:
-			<h1>Login Guest</h1>
-			<form>
-				<label for="email">Email</label>
-				<input name="email" type="email" required />
-				<label for="password">Password</label>
-				<input name="password" type="text" required>
-				<button type="submit" data-on:click="@post('/login', {contentType: 'form'})">Submit</button>
-				<p id="error"></p>
-			</form>
-		case types.LoggedInUser:
-			<h1>You are already logged in!</h1>
+	if utils.IsLoggedIn(ctx) {
+		<h1>You are logged in!</h1>
+	} else {
+		<h1>Login Guest</h1>
+		<form action="/login" method="post">
+			<label for="email">Email</label>
+			<input name="email" type="email" required />
+			<label for="password">Password</label>
+			<input name="password" type="text" required>
+			<button type="submit">Submit</button>
+			<p id="error"></p>
+		</form>
 	}
 }
