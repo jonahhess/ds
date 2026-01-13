@@ -45,3 +45,12 @@ func IsLoggedIn(ctx context.Context) bool {
 	}
 	return userID != 0
 }
+
+type flashContextKeyType struct{}
+
+var FlashContextKey = flashContextKeyType{}
+
+func Flashes(ctx context.Context) []any {
+	f, _ := ctx.Value(FlashContextKey).([]any)
+	return f
+}
