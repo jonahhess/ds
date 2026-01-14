@@ -25,11 +25,13 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 
 	if name == "" || email == "" || password == "" {
+		http.Error(w, "nvalid Credentials", http.StatusNoContent)
 		return
 	}
 
 	hash, err := auth2.HashPassword(password)
 	if err != nil {
+		http.Error(w, "nvalid Credentials", http.StatusNoContent)
 		return
 	}
 
@@ -38,6 +40,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		name, email, hash,
 	)
 	if err != nil {
+		http.Error(w, "nvalid Credentials", http.StatusNoContent)
 		return
 	}
 

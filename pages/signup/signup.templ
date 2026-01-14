@@ -24,7 +24,8 @@ templ Signup() {
 		<input type="text" name="email" required>
 		<label for="password">Password</label>
 		<input type="text" name="password" required>
-		<button type="submit">Submit</button>
+		<button type="submit" data-on:click__delay.1500ms="$clicked = true" >Submit</button>
 		</form>
+		<p data-show="$clicked" data-on-intersect__delay.5s="$clicked = false" >Invalid Credentials</p>
 	}
 }

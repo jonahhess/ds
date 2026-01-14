@@ -39,7 +39,7 @@ func Login() templ.Component {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<h1>Login Guest</h1><form action=\"/login\" method=\"post\"><label for=\"email\">Email</label> <input name=\"email\" type=\"email\" required> <label for=\"password\">Password</label> <input name=\"password\" type=\"text\" required> <button type=\"submit\" data-on:click__delay.2s=\"$clicked = true\">Submit</button><p id=\"error\" data-show=\"$clicked\" data-on-intersect__delay.2s=\"$clicked = false\">Error</p></form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<h1>Login Guest</h1><form action=\"/login\" method=\"post\"><label for=\"email\">Email</label> <input name=\"email\" type=\"email\" required> <label for=\"password\">Password</label> <input name=\"password\" type=\"text\" required> <button type=\"submit\" data-on:click__delay.1500ms=\"$clicked = true\">Submit</button><p data-show=\"$clicked\" data-on-intersect__delay.5s=\"$clicked = false\">Invalid Credentials</p></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

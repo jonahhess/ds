@@ -37,10 +37,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	).Scan(&userID, &hash)
 
 	if err != nil {
+		http.Error(w, "nvalid Credentials", http.StatusNoContent)
 		return
 	}
 
 	if err := auth2.CheckPassword(password, hash); err != nil {
+		http.Error(w, "Invalid Credentials", http.StatusNoContent)
 		return
 	}
 
