@@ -27,12 +27,4 @@ templ Signup() {
 		<button type="submit">Submit</button>
 		</form>
 	}
-
-	{{ flashes := utils.Flashes(ctx) }}
-
-    if len(flashes) > 0 {
-        <div class="error">
-            { flashes[0].(string) }
-        </div>
-    }
 }

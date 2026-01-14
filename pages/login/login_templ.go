@@ -39,27 +39,7 @@ func Login() templ.Component {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<h1>Login Guest</h1><form action=\"/login\" method=\"post\"><label for=\"email\">Email</label> <input name=\"email\" type=\"email\" required> <label for=\"password\">Password</label> <input name=\"password\" type=\"text\" required> <button type=\"submit\">Submit</button><p id=\"error\"></p></form>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		flashes := utils.Flashes(ctx)
-		if len(flashes) > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div data-init__delay.2s=\"@get('/login')\" class=\"error\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var2 string
-			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(flashes[0].(string))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pages/login/login.templ`, Line: 26, Col: 33}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<h1>Login Guest</h1><form action=\"/login\" method=\"post\"><label for=\"email\">Email</label> <input name=\"email\" type=\"email\" required> <label for=\"password\">Password</label> <input name=\"password\" type=\"text\" required> <button type=\"submit\" data-on:click__delay.2s=\"$clicked = true\">Submit</button><p id=\"error\" data-show=\"$clicked\" data-on-intersect__delay.2s=\"$clicked = false\">Error</p></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

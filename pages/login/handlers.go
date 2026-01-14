@@ -22,11 +22,6 @@ func Page(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	sess, ok := utils.SessionFromContext(r.Context())
-	if !ok {
-		http.Error(w, "Failed to get session", http.StatusInternalServerError)
-		return
-	}
 
 	email := r.FormValue("email")
 	password := r.FormValue("password")
@@ -42,20 +37,18 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	).Scan(&userID, &hash)
 
 	if err != nil {
-		sess.AddFlash("Invalid email or password")
-		sess.Save(r, w)
-
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
 	if err := auth2.CheckPassword(password, hash); err != nil {
-		sess.AddFlash("Invalid email or password")
-		sess.Save(r, w)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
+	sess, ok := utils.SessionFromContext(r.Context())
+	if !ok {
+		http.Error(w, "Failed to get session", http.StatusInternalServerError)
+		return
+	}
 	sess.Values["user_id"] = userID
 
 	if err := sess.Save(r, w); err != nil {

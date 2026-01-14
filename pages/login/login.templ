@@ -14,16 +14,8 @@ templ Login() {
 			<input name="email" type="email" required />
 			<label for="password">Password</label>
 			<input name="password" type="text" required>
-			<button type="submit">Submit</button>
-			<p id="error"></p>
+			<button type="submit" data-on:click__delay.2s="$clicked = true" >Submit</button>
+			<p id="error" data-show="$clicked" data-on-intersect__delay.2s="$clicked = false" >Error</p>
 		</form>
 	}
-
-	{{ flashes := utils.Flashes(ctx) }}
-
-    if len(flashes) > 0 {
-        <div data-init__delay.2s="@get('/login')" class="error">
-            { flashes[0].(string) }
-        </div>
-    }
 }
