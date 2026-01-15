@@ -21,6 +21,18 @@ func Page(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func ErrPage(w http.ResponseWriter, r *http.Request) {
+
+	err := layouts.
+		Base("Login", LoginError()).
+		Render(r.Context(), w)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	email := r.FormValue("email")
@@ -37,12 +49,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	).Scan(&userID, &hash)
 
 	if err != nil {
-		http.Error(w, "nvalid Credentials", http.StatusNoContent)
+		http.Redirect(w, r, "/loginError", http.StatusSeeOther)
 		return
 	}
 
 	if err := auth2.CheckPassword(password, hash); err != nil {
-		http.Error(w, "Invalid Credentials", http.StatusNoContent)
+		http.Redirect(w, r, "/loginError", http.StatusSeeOther)
 		return
 	}
 

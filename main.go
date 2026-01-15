@@ -37,7 +37,7 @@ func main() {
 
 	// --- server ---
 	srv := &http.Server{
-		Addr:         ":8088",
+		Addr:         ":8080",
 		Handler:      r,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
@@ -45,7 +45,7 @@ func main() {
 	}
 
 	go func() {
-		log.Println("server started on :8088")
+		log.Println("server started on :8080")
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("server error: %v", err)
 		}

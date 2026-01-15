@@ -19,19 +19,31 @@ func Page(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func ErrPage(w http.ResponseWriter, r *http.Request) {
+
+	err := layouts.
+		Base("Signup", SignupError()).
+		Render(r.Context(), w)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("name")
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
 	if name == "" || email == "" || password == "" {
-		http.Error(w, "nvalid Credentials", http.StatusNoContent)
+		http.Redirect(w, r, "/signupError", http.StatusSeeOther)
 		return
 	}
 
 	hash, err := auth2.HashPassword(password)
 	if err != nil {
-		http.Error(w, "nvalid Credentials", http.StatusNoContent)
+		http.Redirect(w, r, "/signupError", http.StatusSeeOther)
 		return
 	}
 
@@ -40,7 +52,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		name, email, hash,
 	)
 	if err != nil {
-		http.Error(w, "nvalid Credentials", http.StatusNoContent)
+		http.Redirect(w, r, "/signupError", http.StatusSeeOther)
 		return
 	}
 

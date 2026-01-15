@@ -12,7 +12,7 @@ import (
 	"myapp/utils"
 )
 
-func Login() templ.Component {
+func LoginError() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -39,7 +39,7 @@ func Login() templ.Component {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<h1>Login Guest</h1><form action=\"/login\" method=\"post\"><label for=\"email\">Email</label> <input name=\"email\" type=\"email\" required> <label for=\"password\">Password</label> <input name=\"password\" type=\"text\" required> <button type=\"submit\">Submit</button></form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<h1>Login Guest</h1><form action=\"/login\" method=\"post\"><label for=\"email\">Email</label> <input name=\"email\" type=\"email\" required> <label for=\"password\">Password</label> <input name=\"password\" type=\"text\" required> <button type=\"submit\">Submit</button><p data-show=\"!$hide\" data-on-intersect__delay.5s=\"$hide = true\">Invalid Credentials</p></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

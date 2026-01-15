@@ -34,8 +34,10 @@ func SetupRoutes(sessionStore *sessions.CookieStore) *chi.Mux {
 		r.Get("/about", about.Page)
 		r.Get("/login", login.Page)
 		r.Post("/login", login.LoginHandler)
+		r.Get("/loginError", login.ErrPage)
 		r.Get("/signup", signup.Page)
 		r.Post("/signup", signup.SignupHandler)
+		r.Get("/signupError", signup.ErrPage)
 		r.Post("/logout", navbar.LogoutHandler)
 	})
 
