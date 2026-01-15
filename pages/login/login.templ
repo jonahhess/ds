@@ -1,0 +1,21 @@
+package login
+
+import (
+	"myapp/utils"
+)
+
+templ Login() {
+	if utils.IsLoggedIn(ctx) {
+		<h1>You are logged in!</h1>
+	} else {
+		<h1>Login Guest</h1>
+		<form action="/login" method="post">
+			<label for="email">Email</label>
+			<input name="email" type="email" required />
+			<label for="password">Password</label>
+			<input name="password" type="text" required>
+			<button type="submit" data-on:click__delay.1500ms="$clicked = true" >Submit</button>
+			<p data-show="$clicked" data-on-intersect__delay.5s="$clicked = false" >Invalid Credentials</p>
+		</form>
+	}
+}

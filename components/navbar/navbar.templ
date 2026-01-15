@@ -1,29 +1,35 @@
-package components
+package navbar
 
-import "myapp/types"
+import (
+	"myapp/types"
+	"myapp/utils"
+)
 
-func GetUserLinks(user types.UserType) []types.Link {
+func GetUserLinks(isLoggedIn bool) []types.Link {
 	home := types.Link{Href: "/", Title: "Home"}
 	var links []types.Link
 
-	switch user {
-	case types.Guest:
+	if !isLoggedIn {
 		login := types.Link{Href: "/login", Title: "Log In"}
 		signup := types.Link{Href: "/signup", Title: "Sign Up"}
 		links = []types.Link{home, login, signup}
-	case types.UserType(1):
+	} else {
 		profile := types.Link{Href: "/about", Title: "About"}
-		logout := types.Link{Href: "/logout", Title: "Logout"}
-		links = []types.Link{home, profile, logout}
+		links = []types.Link{home, profile}
 	}
 
 	return links
 }
 
-templ Navbar(user *User {
+templ Navbar() {
 	<header class="navbar">
-		for _, l := range GetUserLinks(user) {
-			<a class="navbar-element" href={ l.Href }>{ l.Title }</a>
+		for _, l := range GetUserLinks(utils.IsLoggedIn(ctx)) {
+			<a class="navbar-element" href={ templ.SafeURL(l.Href) }>{ l.Title }</a>
+		}
+		if utils.IsLoggedIn(ctx) {
+			<form class="navbar-element" method="POST" action="/logout">
+				<button type="submit" class="logout-button">Log Out</button>
+			</form>
 		}
 	</header>
 }

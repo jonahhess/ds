@@ -1,9 +1,9 @@
 package types
 
 type User struct {
-    ID       int64
-    Name     string
-    Email    string
-    Username string
-    UserType UserType
+	ID           string
+	Name         string
+	Email        string
+	Username     string
+	PasswordHash string
 }

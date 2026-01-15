@@ -1,25 +1,49 @@
 package router
 
 import (
-	"context"
 	"net/http"
+	"time"
 
-	"myapp/auth"
-	"myapp/layouts"
+	"myapp/components/navbar"
+	middlewares "myapp/middlewares"
+	about "myapp/pages/about"
 	home "myapp/pages/home"
+	"myapp/pages/login"
+	"myapp/pages/notFound"
+	"myapp/pages/signup"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/gorilla/sessions"
 )
 
-func SetupRoutes(
-	appCtx context.Context,
-	sessionStore *sqliteStore,
-) *chi.Mux {
-
+func SetupRoutes(sessionStore *sessions.CookieStore) *chi.Mux {
 	r := chi.NewRouter()
-	r.Use(auth.AuthMiddleware(sessionStore))
 
-	// ---- static files ----
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+
+	r.Use(middleware.Timeout(60 * time.Second))
+
+	r.Use(middlewares.SessionMiddleware(sessionStore))
+
+	r.Route("/", func(r chi.Router) {
+		r.Get("/", home.Page)
+		r.Get("/about", about.Page)
+		r.Get("/login", login.Page)
+		r.Post("/login", login.LoginHandler)
+		r.Get("/signup", signup.Page)
+		r.Post("/signup", signup.SignupHandler)
+		r.Post("/logout", navbar.LogoutHandler)
+	})
+
+	//r.Group(func(r chi.Router) {
+	//r.Use(middlewares.AuthMiddleware)
+	//r.Get("/user", user.userHandler)
+	//})
+
 	r.Handle("/static/*",
 		http.StripPrefix("/static/",
 			http.FileServer(http.Dir("./static")),
@@ -38,21 +62,7 @@ func SetupRoutes(
 		),
 	)
 
-	// ---- routes ----
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		user, ok := auth.UserFromContext(r.Context())
-		if !ok {
-			http.Error(w,"User not found",http.StatusInternalServerError)
-		}
-		
-		err := layouts.
-			Base("Home", user, home.Home(user.UserType)).
-			Render(r.Context(), w)
-
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-	})
+	r.NotFound(notFound.Page)
 
 	return r
 }

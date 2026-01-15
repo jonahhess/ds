@@ -1,0 +1,31 @@
+package signup
+
+import (
+	"myapp/utils"
+)
+
+type UserSignup struct {
+	Name         string
+	Email        string
+	Password     string
+}
+
+
+
+templ Signup() {
+	if utils.IsLoggedIn(ctx) {
+		<h1>You are logged in!</h1>
+	} else {
+		<h1>Signup</h1>
+		<form action="/signup" method="post">
+		<label for="name">Name</label>
+		<input name="name" type="text" required />
+		<label for="email">Email</label>
+		<input type="text" name="email" required>
+		<label for="password">Password</label>
+		<input type="text" name="password" required>
+		<button type="submit" data-on:click__delay.1500ms="$clicked = true" >Submit</button>
+		</form>
+		<p data-show="$clicked" data-on-intersect__delay.5s="$clicked = false" >Invalid Credentials</p>
+	}
+}

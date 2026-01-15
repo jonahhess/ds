@@ -1,0 +1,13 @@
+package template
+
+import (
+	"myapp/utils"
+)
+
+templ Template() {
+	if utils.IsLoggedIn(ctx) {
+		<h1>Template User</h1>
+	} else {
+		<h1>Template Guest</h1>
+	}
+}
