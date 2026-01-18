@@ -1,0 +1,15 @@
+package myCourses
+
+import (
+	"database/sql"
+	"myapp/utils"
+)
+
+templ MyCourses(DB *sql.DB) {
+	if utils.IsLoggedIn(ctx) {
+		<h1>All MyCourses</h1>
+		{{ GetAllMyCourses(ctx, DB) }}
+	} else {
+		<h1>Please log in to continue</h1>
+	}
+}
