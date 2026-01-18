@@ -1,7 +1,7 @@
 package signup
 
 import (
-	"myapp/auth2"
+	"myapp/auth"
 	"myapp/db"
 	"myapp/layouts"
 	"net/http"
@@ -11,18 +11,6 @@ func Page(w http.ResponseWriter, r *http.Request) {
 
 	err := layouts.
 		Base("Signup", Signup()).
-		Render(r.Context(), w)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
-func ErrPage(w http.ResponseWriter, r *http.Request) {
-
-	err := layouts.
-		Base("Signup", SignupError()).
 		Render(r.Context(), w)
 
 	if err != nil {
@@ -41,7 +29,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hash, err := auth2.HashPassword(password)
+	hash, err := auth.HashPassword(password)
 	if err != nil {
 		http.Redirect(w, r, "/signupError", http.StatusSeeOther)
 		return

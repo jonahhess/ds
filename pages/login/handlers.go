@@ -2,7 +2,7 @@ package login
 
 import (
 	"log"
-	"myapp/auth2"
+	"myapp/auth"
 	"myapp/db"
 	"myapp/layouts"
 	"myapp/utils"
@@ -13,18 +13,6 @@ func Page(w http.ResponseWriter, r *http.Request) {
 
 	err := layouts.
 		Base("Login", Login()).
-		Render(r.Context(), w)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
-func ErrPage(w http.ResponseWriter, r *http.Request) {
-
-	err := layouts.
-		Base("Login", LoginError()).
 		Render(r.Context(), w)
 
 	if err != nil {
@@ -53,7 +41,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := auth2.CheckPassword(password, hash); err != nil {
+	if err := auth.CheckPassword(password, hash); err != nil {
 		http.Redirect(w, r, "/loginError", http.StatusSeeOther)
 		return
 	}
