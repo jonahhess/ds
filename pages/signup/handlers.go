@@ -9,8 +9,14 @@ import (
 
 func Page(w http.ResponseWriter, r *http.Request) {
 
+	// extract error if exists
+	errMsg := ""
+	if r.URL.Query().Get("error") == "1" {
+		errMsg = "Invalid Credentials"
+	}
+
 	err := layouts.
-		Base("Signup", Signup()).
+		Base("Signup", Signup(errMsg)).
 		Render(r.Context(), w)
 
 	if err != nil {
@@ -25,13 +31,13 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 
 	if name == "" || email == "" || password == "" {
-		http.Redirect(w, r, "/signupError", http.StatusSeeOther)
+		http.Redirect(w, r, "/signup?error=1", http.StatusSeeOther)
 		return
 	}
 
 	hash, err := auth.HashPassword(password)
 	if err != nil {
-		http.Redirect(w, r, "/signupError", http.StatusSeeOther)
+		http.Redirect(w, r, "/signup?error=1", http.StatusSeeOther)
 		return
 	}
 
@@ -40,7 +46,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		name, email, hash,
 	)
 	if err != nil {
-		http.Redirect(w, r, "/signupError", http.StatusSeeOther)
+		http.Redirect(w, r, "/signup?error=1", http.StatusSeeOther)
 		return
 	}
 
