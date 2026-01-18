@@ -57,20 +57,27 @@ func CreateTables() error {
 	CREATE TABLE lessons (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   course_id INTEGER FOREIGN KEY,
+  quiz_id INTEGER FOREIGN KEY, 
   title TEXT NOT NULL,
   text TEXT NOT NULL,
-  quiz_id INTEGER FOREIGN KEY, 
   created_by TEXT NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
     `
  DB.Exec(lessons);
 
+  quizzes := `
+	CREATE TABLE quizzes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  lesson_id INTEGER FOREIGN KEY UNIQUE
+);
+    `
+ DB.Exec(quizzes);
+
   questions := `
 	CREATE TABLE questions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  lesson_id INTEGER FOREIGN KEY,
-  title TEXT NOT NULL,
+  quiz_id INTEGER FOREIGN KEY,
   text TEXT NOT NULL,
   created_by TEXT NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -95,6 +102,20 @@ func CreateTables() error {
 );
     `
  DB.Exec(correctAnswer);
+
+  reviewcards := `
+	CREATE TABLE reviewcards (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER FOREIGN KEY,
+  question_id INTEGER FOREIGN KEY,
+  consecutiveSuccesses INTEGER DEFAULT 0,
+  successes INTEGER DEFAULT 0,
+  reviews INTEGER DEFAULT 0,
+  created_by TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+    `
+ DB.Exec(reviewcards);
 
 	return nil
 }
