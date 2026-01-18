@@ -11,6 +11,7 @@ import (
 	"myapp/pages/login"
 	"myapp/pages/notFound"
 	"myapp/pages/signup"
+	"myapp/pages/study"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -39,10 +40,10 @@ func SetupRoutes(sessionStore *sessions.CookieStore) *chi.Mux {
 		r.Post("/logout", navbar.LogoutHandler)
 	})
 
-	//r.Group(func(r chi.Router) {
-	//r.Use(middlewares.AuthMiddleware)
-	//r.Get("/user", user.userHandler)
-	//})
+	r.Group(func(r chi.Router) {
+	r.Use(middlewares.AuthMiddleware)
+	r.Get("/study", study.Page)
+	})
 
 	r.Handle("/static/*",
 		http.StripPrefix("/static/",
