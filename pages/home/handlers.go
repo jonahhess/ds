@@ -6,7 +6,6 @@ import (
 )
 
 func Page(w http.ResponseWriter, r *http.Request) {
-
 	err := layouts.
 		Base("Home", Home()).
 		Render(r.Context(), w)
