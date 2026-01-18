@@ -1,5 +1,25 @@
 package toast
 
 templ Toast(errMsg string) {
-	<p class="toast">{ errMsg }</p>
+	if errMsg != "" {
+		<style type="text/css">
+			.toast {
+			background: #fee;
+			color: #900;
+			padding: 12px;
+			border: 1px solid #f99;
+			border-radius: 4px;
+			animation: fadeOut 1s ease forwards;
+			animation-delay: 5s;
+			}
+
+		@keyframes fadeOut {
+			to {
+				opacity: 0;
+				visibility: hidden;
+			}
+			}
+		</style>
+		<p class="toast">{ errMsg }</p>
+	}
 }
