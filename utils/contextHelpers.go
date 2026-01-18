@@ -27,14 +27,14 @@ func IsLoggedIn(ctx context.Context) bool {
 	return userID != 0
 }
 
-func GetUserID(ctx context.Context) string {
+func GetUserID(ctx context.Context) int {
 	session, ok := SessionFromContext(ctx)
 	if !ok {
-		return ""
+		return 0
 	}
-	userID, ok := session.Values["user_id"].(string)
+	userID, ok := session.Values["user_id"].(int)
 	if !ok {
-		return ""
+		return 0
 	}
 	return userID
 }
