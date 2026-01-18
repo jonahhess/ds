@@ -1,7 +1,5 @@
 tmp/
 myapp
 .DS_Store
-auth/token.go
-auth/
 *.db
 .env
