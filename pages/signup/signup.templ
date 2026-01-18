@@ -1,30 +1,30 @@
 package signup
 
 import (
+	"myapp/components/toast"
 	"myapp/utils"
 )
 
 type UserSignup struct {
-	Name         string
-	Email        string
-	Password     string
+	Name     string
+	Email    string
+	Password string
 }
 
-
-
-templ Signup() {
+templ Signup(errMsg string) {
 	if utils.IsLoggedIn(ctx) {
 		<h1>You are logged in!</h1>
 	} else {
 		<h1>Signup</h1>
 		<form action="/signup" method="post">
-		<label for="name">Name</label>
-		<input name="name" type="text" required />
-		<label for="email">Email</label>
-		<input type="text" name="email" required>
-		<label for="password">Password</label>
-		<input type="text" name="password" required>
-		<button type="submit">Submit</button>
+			<label for="name">Name</label>
+			<input name="name" type="text" required/>
+			<label for="email">Email</label>
+			<input type="text" name="email" required/>
+			<label for="password">Password</label>
+			<input type="text" name="password" required/>
+			<button type="submit">Submit</button>
 		</form>
+		@toast.Toast(errMsg)
 	}
 }
