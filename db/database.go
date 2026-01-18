@@ -30,7 +30,7 @@ func CloseDB() error {
 }
 
 func CreateTables() error {
-	query := `
+	users := `
 	CREATE TABLE users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
@@ -39,6 +39,62 @@ func CreateTables() error {
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
     `
-	_, err := DB.Exec(query)
-	return err
+
+	DB.Exec(users)
+
+	courses := `
+	CREATE TABLE courses (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  description TEXT,
+  created_by TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+    `
+ DB.Exec(courses)
+
+ 	lessons := `
+	CREATE TABLE lessons (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  course_id INTEGER FOREIGN KEY,
+  title TEXT NOT NULL,
+  text TEXT NOT NULL,
+  quiz_id INTEGER FOREIGN KEY, 
+  created_by TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+    `
+ DB.Exec(lessons);
+
+  questions := `
+	CREATE TABLE questions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  lesson_id INTEGER FOREIGN KEY,
+  title TEXT NOT NULL,
+  text TEXT NOT NULL,
+  created_by TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+    `
+ DB.Exec(questions);
+
+  answers := `
+	CREATE TABLE answers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  question_id INTEGER FOREIGN KEY,
+  text TEXT NOT NULL
+);
+    `
+ DB.Exec(answers);
+
+  correctAnswer := `
+	CREATE TABLE correctAnswer (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  question_id INTEGER FOREIGN KEY,
+  answer_id INTEGER FOREIGN KEY
+);
+    `
+ DB.Exec(correctAnswer);
+
+	return nil
 }
