@@ -4,15 +4,8 @@ import (
 	"myapp/utils"
 )
 
-type UserSignup struct {
-	Name         string
-	Email        string
-	Password     string
-}
 
-
-
-templ Signup() {
+templ SignupError() {
 	if utils.IsLoggedIn(ctx) {
 		<h1>You are logged in!</h1>
 	} else {
@@ -26,5 +19,6 @@ templ Signup() {
 		<input type="text" name="password" required>
 		<button type="submit">Submit</button>
 		</form>
+		<p data-show="!$hide" data-on-intersect__delay.5s="$hide = true" >Invalid Credentials</p>
 	}
 }

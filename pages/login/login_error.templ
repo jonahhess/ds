@@ -4,7 +4,7 @@ import (
 	"myapp/utils"
 )
 
-templ Login() {
+templ LoginError() {
 	if utils.IsLoggedIn(ctx) {
 		<h1>You are logged in!</h1>
 	} else {
@@ -15,6 +15,7 @@ templ Login() {
 			<label for="password">Password</label>
 			<input name="password" type="text" required>
 			<button type="submit">Submit</button>
+			<p data-show="!$hide" data-on-intersect__delay.5s="$hide = true" >Invalid Credentials</p>
 		</form>
 	}
 }
