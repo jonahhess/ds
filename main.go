@@ -33,7 +33,7 @@ func main() {
 	defer db.CloseDB()
 
 	sess := sessions.InitStore()
-	r := router.SetupRoutes(sess)
+	r := router.SetupRoutes(sess, db.DB)
 
 	// --- server ---
 	srv := &http.Server{
