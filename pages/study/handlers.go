@@ -6,7 +6,6 @@ import (
 )
 
 func Page(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
 
 	err := layouts.
 		Base("Study", Study()).

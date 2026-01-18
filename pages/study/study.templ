@@ -1,0 +1,14 @@
+package study
+
+import "myapp/utils"
+
+templ Study() {
+	if utils.IsLoggedIn(ctx) {
+		{{ myCourses := utils.UserLink(ctx, "courses") }}
+		<h1>Study</h1>
+		<a href={ myCourses }>Courses</a>
+		<a href="/courses">All Courses</a>
+	} else {
+		<h1>Log in to Continue</h1>
+	}
+}
