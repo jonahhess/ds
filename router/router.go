@@ -1,12 +1,14 @@
 package router
 
 import (
+	"database/sql"
 	"net/http"
 	"time"
 
 	"myapp/components/navbar"
 	middlewares "myapp/middlewares"
 	about "myapp/pages/about"
+	"myapp/pages/courses"
 	home "myapp/pages/home"
 	"myapp/pages/login"
 	"myapp/pages/notFound"
@@ -18,7 +20,7 @@ import (
 	"github.com/gorilla/sessions"
 )
 
-func SetupRoutes(sessionStore *sessions.CookieStore) *chi.Mux {
+func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -39,10 +41,11 @@ func SetupRoutes(sessionStore *sessions.CookieStore) *chi.Mux {
 		r.Post("/signup", signup.SignupHandler)
 		r.Post("/logout", navbar.LogoutHandler)
 	})
-
+	
 	r.Group(func(r chi.Router) {
-	r.Use(middlewares.AuthMiddleware)
-	r.Get("/study", study.Page)
+		r.Use(middlewares.AuthMiddleware)
+		r.Get("/study", study.Page)
+		r.Get("/courses",courses.Page(DB))
 	})
 
 	r.Handle("/static/*",
