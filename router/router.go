@@ -12,6 +12,7 @@ import (
 	home "myapp/pages/home"
 	"myapp/pages/login"
 	"myapp/pages/notFound"
+	"myapp/pages/review"
 	"myapp/pages/signup"
 	"myapp/pages/study"
 
@@ -46,6 +47,7 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 		r.Use(middlewares.AuthMiddleware)
 		r.Get("/study", study.Page)
 		r.Get("/courses",courses.Page(DB))
+		r.Get("/review", review.Page(DB))
 	})
 
 	r.Handle("/static/*",
