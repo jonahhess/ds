@@ -11,5 +11,5 @@ func UserLink(ctx context.Context, path string) string {
 	if !ok {
 		return "/notfound"
 	}
-	return fmt.Sprintf("/%d/%s", userID, path)
+	return fmt.Sprintf("/users/%d/%s", userID, path)
 }
