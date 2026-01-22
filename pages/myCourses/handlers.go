@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"myapp/auth"
 	"myapp/layouts"
-	"myapp/utils"
 	"net/http"
 )
 
@@ -23,8 +23,8 @@ func Page(DB *sql.DB) http.HandlerFunc {
 }
 
 func GetAllMyCourses(ctx context.Context, DB *sql.DB) *sql.Rows{
-	userID := utils.GetUserID(ctx)
-	if userID < 1 {
+	userID, ok := auth.UserIDFromContext(ctx)
+	if !ok {
 		return nil
 	}
 	

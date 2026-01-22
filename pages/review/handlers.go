@@ -2,11 +2,11 @@ package review
 
 import (
 	"database/sql"
+	"myapp/auth"
 	pleaseLogin "myapp/components/pleaseLogin"
 	reviewcard "myapp/components/reviewCard"
 	"myapp/layouts"
 	"myapp/types"
-	"myapp/utils"
 	"net/http"
 	"strconv"
 )
@@ -14,8 +14,8 @@ import (
 func Page(DB *sql.DB) http.HandlerFunc {
  return func(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	userID := utils.GetUserID(ctx)
-	if userID < 1 {
+	userID, ok := auth.UserIDFromContext(ctx)
+	if !ok {
 		layouts.Base("login", pleaseLogin.PleaseLogin()).Render(ctx, w)
 		return
 	}
@@ -47,8 +47,12 @@ func Page(DB *sql.DB) http.HandlerFunc {
 
 func SubmitReviewAnswer(DB *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		userID := utils.GetUserID(ctx)
+		userID, ok := auth.UserIDFromContext(r.Context())
+        if !ok {
+            http.Error(w, "user not logged in", 400)
+            http.Redirect(w,r,"/login",401)
+            return
+        }
 
 		err := r.ParseForm()
 		if err != nil {
