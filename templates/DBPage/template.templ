@@ -1,15 +1,8 @@
 package template
 
-import (
-	"database/sql"
-	"myapp/utils"
-)
+import "database/sql"
 
 templ Template(DB *sql.DB) {
-	if utils.IsLoggedIn(ctx) {
-		<h1>All Template</h1>
-		{{ GetAllTemplate(ctx, DB) }}
-	} else {
-		<h1>Please log in to continue</h1>
-	}
+	<h1>All Template</h1>
+	{{ GetAllTemplate(ctx, DB) }}
 }
