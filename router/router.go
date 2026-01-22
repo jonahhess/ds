@@ -50,7 +50,10 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 		r.Get("/study", study.Page)
 		r.Get("/courses",courses.Page(DB))
 		r.Get("/review", review.Page(DB))
-		r.Get("/{userID}/courses", myCourses.Page(DB))
+
+		r.Route("/users/{userID}", func(r chi.Router) {
+			r.Get("/courses", myCourses.Page(DB))
+		})
 	})
 
 	r.Handle("/static/*",
