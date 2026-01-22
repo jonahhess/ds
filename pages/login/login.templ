@@ -5,7 +5,7 @@ import (
 	"myapp/components/toast"
 )
 
-templ Login(errMsg string, next string) {
+templ Login(errMsg string) {
 	if _, ok := auth.UserIDFromContext(ctx); !ok {
 		<h1>Login Guest</h1>
 		<form action="/login" method="post">
