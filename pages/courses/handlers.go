@@ -25,8 +25,9 @@ func GetAllCourses(ctx context.Context, DB *sql.DB) sql.Result{
 	query := "select title from courses"
 	result, err := DB.Exec(query)
 	if err != nil {
+		fmt.Println("epic fail")
 		return nil
 	}
-	fmt.Println(result)
+	fmt.Println("hello",result)
 	return result
 }

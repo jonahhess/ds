@@ -30,6 +30,7 @@ func GetAllMyCourses(ctx context.Context, DB *sql.DB) *sql.Rows{
 	
 	query, err := DB.Query("select title from user_courses where user_id = ?", userID)
 	if err != nil {
+		fmt.Println("epic fail 2")
 		return nil
 	}
 	fmt.Println(query)
