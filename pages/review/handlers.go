@@ -2,181 +2,173 @@ package review
 
 import (
 	"database/sql"
-	"myapp/auth"
+	"encoding/json"
 	reviewcard "myapp/components/reviewCard"
 	"myapp/layouts"
 	"myapp/types"
 	"net/http"
-	"strconv"
+	"time"
 )
+
+type ReviewCard struct {
+    ID       int       `json:"card_id"`
+    Text     string    `json:"text"`
+    ReviewAt time.Time `json:"-"`
+    // SM2 fields
+    Repetition int     `json:"-"`
+    Interval   int     `json:"-"`
+    EaseFactor float64 `json:"-"`
+    Answers []types.Answer
+}
 
 func Page(DB *sql.DB) http.HandlerFunc {
  return func(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	userID, ok := auth.UserIDFromContext(ctx)
-	if !ok {
-		http.Redirect(w,r,"/login",401)
-		return
-	}
+answers := [2]types.Answer{
+        {ID: 1, Text: "Baby don't hurt me"},
+        {ID: 2, Text: "I want you to show me"},
+    }
 
-	card, err := GetNextReviewCard(DB, userID)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-	
-	if card == nil {
-		layouts.Base("login", reviewcard.ReviewCard(0, "", nil)).Render(ctx, w)
-		return
-	}
-	
-	answers, err := GetAnswersForQuestion(DB, card.QuestionID)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-	
-	layouts.Base("login", reviewcard.ReviewCard(
-		card.QuestionID,
-		card.Question,
-		answers,
-	)).Render(ctx, w)
+	layouts.Base("login", reviewcard.ReviewCard(2,"What is love?", answers)).Render(ctx, w)
  }
 }
 
-func SubmitReviewAnswer(DB *sql.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		userID, ok := auth.UserIDFromContext(r.Context())
-        if !ok {
-            http.Error(w, "user not logged in", 400)
-            http.Redirect(w,r,"/login",401)
-            return
-        }
+// GET /review/next
+func GetNextCard(DB *sql.DB) http.HandlerFunc {
+return func (w http.ResponseWriter, r *http.Request) {
+    card, err := fetchNextCard(DB)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
 
-		err := r.ParseForm()
-		if err != nil {
-			http.Error(w, "invalid form", 400)
-			return
-		}
+    if card == nil {
+        json.NewEncoder(w).Encode(map[string]interface{}{
+            "message": "No cards due for review",
+            "card_id": nil,
+        })
+        return
+    }
 
-		questionID, _ := strconv.Atoi(
-			r.FormValue("question_id"),
-		)
-		answerID, _ := strconv.Atoi(
-			r.FormValue("answer_id"),
-		)
-
-		correct, err := IsAnswerCorrect(DB, questionID, answerID)
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-			return
-		}
-
-		err = UpdateReviewCard(DB, userID, questionID, correct)
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-			return
-		}
-
-		http.Redirect(w, r, "/review", http.StatusSeeOther)
-	}
+    json.NewEncoder(w).Encode(card)
+    }
 }
 
-func GetNextReviewCard(db *sql.DB, userID int) (*types.ReviewCard, error) {
-    row := db.QueryRow(`
-        SELECT
-            rc.user_id,
-            rc.question_id,
-            q.text
-        FROM reviewcards rc
-        JOIN questions q ON q.id = rc.question_id
-        WHERE rc.user_id = ?
-        ORDER BY rc.consecutive_successes ASC, rc.reviews ASC
-        LIMIT 1;
-    `, userID)
-
-    var card types.ReviewCard
-    err := row.Scan(
-        &card.UserID,
-        &card.QuestionID,
-        &card.Question,
-    )
-
-    if err == sql.ErrNoRows {
-        return nil, nil // no more cards
+// POST /review/submit
+func SubmitAnswer(DB *sql.DB) http.HandlerFunc {
+return func (w http.ResponseWriter, r *http.Request) {
+    var input struct {
+        CardID  int `json:"card_id"`
+        Quality int `json:"quality"` // 0-5
     }
+    if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+        http.Error(w, "Invalid JSON", http.StatusBadRequest)
+        return
+    }
+
+    // Fetch the card from DB
+    card, err := fetchCarDByID(DB, input.CardID)
     if err != nil {
+        http.Error(w, "Card not found", http.StatusNotFound)
+        return
+    }
+
+    // Apply SM2 algorithm (stub)
+    card.ReviewAt, card.Repetition, card.Interval, card.EaseFactor = applySM2(card, input.Quality)
+
+    // Update DB
+    if err := updateCardReview(DB, card); err != nil {
+        http.Error(w, "Failed to update card", http.StatusInternalServerError)
+        return
+    }
+
+    // Fetch next card
+    nextCard, err := fetchNextCard(DB)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    if nextCard == nil {
+        json.NewEncoder(w).Encode(map[string]interface{}{
+            "message": "Session complete",
+            "card_id": nil,
+        })
+        return
+    }
+
+    json.NewEncoder(w).Encode(nextCard)
+}}
+
+// --- DB Helpers ---
+
+func fetchNextCard(DB *sql.DB) (*ReviewCard, error) {
+    q := ReviewCard{}
+row := DB.QueryRow(`
+    SELECT id, text, review_at, repetition, interval, ease_factor
+    FROM question
+    WHERE review_at <= CURRENT_TIMESTAMP
+    ORDER BY review_at
+    LIMIT 1
+`)
+err := row.Scan(&q.ID, &q.Text, &q.ReviewAt, &q.Repetition, &q.Interval, &q.EaseFactor)
+if err == sql.ErrNoRows {
+    return nil, nil
+}
+
+// fetch answers
+rows, err := DB.Query(`SELECT id, text FROM answers WHERE question_id = ?`, q.ID)
+if err != nil {
+    return nil, err
+}
+defer rows.Close()
+
+for rows.Next() {
+    var a types.Answer
+    if err := rows.Scan(&a.ID, &a.Text); err != nil {
         return nil, err
     }
-
-    return &card, nil
+    q.Answers = append(q.Answers, a)
+}
+    return &q, nil
 }
 
-func GetAnswersForQuestion(db *sql.DB, questionID int) ([]types.Answer, error) {
-    rows, err := db.Query(`
-        SELECT id, text
-        FROM answers
-        WHERE question_id = ?
-        ORDER BY id;
-    `, questionID)
-    if err != nil {
-        return nil, err
-    }
-    defer rows.Close()
-
-    var answers []types.Answer
-
-    for rows.Next() {
-        var a types.Answer
-        if err := rows.Scan(&a.ID, &a.Text); err != nil {
-            return nil, err
-        }
-        answers = append(answers, a)
-    }
-
-    return answers, rows.Err()
-}
-
-func IsAnswerCorrect(db *sql.DB, questionID, answerID int) (bool, error) {
-    row := db.QueryRow(`
-        SELECT 1
-        FROM correct_answers
-        WHERE question_id = ? AND answer_id = ?;
-    `, questionID, answerID)
-
-    var dummy int
-    err := row.Scan(&dummy)
-
+func fetchCarDByID(DB *sql.DB, id int) (*ReviewCard, error) {
+    row := DB.QueryRow(`SELECT id, text, review_at, repetition, interval, ease_factor FROM question WHERE id=$1`, id)
+    var q ReviewCard
+    err := row.Scan(&q.ID, &q.Text, &q.ReviewAt, &q.Repetition, &q.Interval, &q.EaseFactor)
     if err == sql.ErrNoRows {
-        return false, nil
+        return nil, nil
     }
-    if err != nil {
-        return false, err
-    }
-
-    return true, nil
+    return &q, err
 }
 
-func UpdateReviewCard(
-    db *sql.DB,
-    userID int,
-    questionID int,
-    correct bool,
-) error {
-
-    _, err := db.Exec(`
-        UPDATE reviewcards
-        SET
-            reviews = reviews + 1,
-            successes = successes + CASE WHEN ? THEN 1 ELSE 0 END,
-            consecutive_successes = CASE
-                WHEN ? THEN consecutive_successes + 1
-                ELSE 0
-            END
-        WHERE user_id = ? AND question_id = ?;
-    `, correct, correct, userID, questionID)
-
+func updateCardReview(DB *sql.DB, q *ReviewCard) error {
+    _, err := DB.Exec(`UPDATE question SET review_at=$1, repetition=$2, interval=$3, ease_factor=$4 WHERE id=$5`,
+        q.ReviewAt, q.Repetition, q.Interval, q.EaseFactor, q.ID)
     return err
 }
 
+// --- SM2 Algorithm Stub ---
+func applySM2(card *ReviewCard, quality int) (reviewAt time.Time, repetition int, interval int, easeFactor float64) {
+    // Simplified SM2 algorithm logic
+    easeFactor = card.EaseFactor
+    repetition = card.Repetition
+    interval = card.Interval
 
+    if quality < 3 {
+        repetition = 0
+        interval = 1
+    } else {
+        repetition++
+        easeFactor = max(1.3, easeFactor + 0.1 - float64(5-quality)*(0.08+float64(5-quality)*0.02))
+        switch repetition {
+        case 1: interval = 1
+        case 2: interval = 6
+        default: interval = int(float64(interval) * easeFactor)
+        }
+    }
+
+    reviewAt = time.Now().Add(time.Duration(interval) * 24 * time.Hour)
+    return reviewAt, repetition, interval, easeFactor
+}
