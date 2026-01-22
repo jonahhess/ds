@@ -5,8 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"myapp/components/navbar"
-	middlewares "myapp/middlewares"
+	"myapp/auth"
 	about "myapp/pages/about"
 	"myapp/pages/courses"
 	home "myapp/pages/home"
@@ -32,20 +31,22 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 
 	r.Use(middleware.Timeout(60 * time.Second))
 
-	r.Use(middlewares.SessionMiddleware(sessionStore))
+	r.Use(auth.SessionMiddleware(sessionStore))
 
-	r.Route("/", func(r chi.Router) {
+	r.Group( func(r chi.Router) {
+		r.Use(auth.OptionalUserMiddleware)
 		r.Get("/", home.Page)
 		r.Get("/about", about.Page)
 		r.Get("/login", login.Page)
-		r.Post("/login", login.LoginHandler)
+		r.Post("/login", auth.LoginHandler)
 		r.Get("/signup", signup.Page)
 		r.Post("/signup", signup.SignupHandler)
-		r.Post("/logout", navbar.LogoutHandler)
+		r.Post("/logout", auth.LogoutHandler)
+		r.NotFound(notFound.Page)
 	})
 	
 	r.Group(func(r chi.Router) {
-		r.Use(middlewares.AuthMiddleware)
+		r.Use(auth.AuthMiddleware)
 		r.Get("/study", study.Page)
 		r.Get("/courses",courses.Page(DB))
 		r.Get("/review", review.Page(DB))
@@ -69,8 +70,6 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 			http.FileServer(http.Dir("./components")),
 		),
 	)
-
-	r.NotFound(notFound.Page)
 
 	return r
 }
