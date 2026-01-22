@@ -1,32 +1,17 @@
 package navbar
 
-import (
-	"myapp/types"
-	"myapp/utils"
-)
-
-func GetUserLinks(isLoggedIn bool) []types.Link {
-	home := types.Link{Href: "/", Title: "Home"}
-	var links []types.Link
-
-	if !isLoggedIn {
-		login := types.Link{Href: "/login", Title: "Log In"}
-		signup := types.Link{Href: "/signup", Title: "Sign Up"}
-		links = []types.Link{home, login, signup}
-	} else {
-		profile := types.Link{Href: "/about", Title: "About"}
-		links = []types.Link{home, profile}
-	}
-
-	return links
-}
+import "myapp/auth"
 
 templ Navbar() {
 	<header class="navbar">
-		for _, l := range GetUserLinks(utils.IsLoggedIn(ctx)) {
-			<a class="navbar-element" href={ templ.SafeURL(l.Href) }>{ l.Title }</a>
-		}
-		if utils.IsLoggedIn(ctx) {
+		if _, ok := auth.UserIDFromContext(ctx); !ok {
+			<a href="/">Home</a>
+			<a href="/login">Log in</a>
+			<a href="/signup">Sign Up</a>
+		} else {
+			<a href="/">Home</a>
+			<a href="/study">Study</a>
+			<a href="/review">Review</a>
 			<form class="navbar-element" method="POST" action="/logout">
 				<button type="submit" class="logout-button">Log Out</button>
 			</form>
