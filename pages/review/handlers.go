@@ -24,12 +24,12 @@ type ReviewCard struct {
 func Page(DB *sql.DB) http.HandlerFunc {
  return func(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-answers := [2]types.Answer{
+answers := []types.Answer{
         {ID: 1, Text: "Baby don't hurt me"},
         {ID: 2, Text: "I want you to show me"},
     }
 
-	layouts.Base("login", reviewcard.ReviewCard(2,"What is love?", answers)).Render(ctx, w)
+	layouts.Base("Review", reviewcard.ReviewCard(2,"What is love?", answers)).Render(ctx, w)
  }
 }
 

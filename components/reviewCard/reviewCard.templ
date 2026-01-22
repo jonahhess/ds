@@ -10,7 +10,7 @@ type Answer struct {
 	Text string
 }
 
-templ ReviewCard(questionID int, question string, answers [2]types.Answer) {
+templ ReviewCard(questionID int, question string, answers []types.Answer) {
 	if questionID > 0 {
 		<form method="POST" action="/review/submit">
 			<input type="hidden" name="question_id" value={ fmt.Sprint(questionID) }/>
