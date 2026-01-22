@@ -5,6 +5,10 @@ import (
 	"net/http"
 )
 
+type userIDKeyType struct{}
+
+var userIDKey = userIDKeyType{}
+
 func OptionalUserMiddleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
         sess, _ := SessionFromContext(r.Context())
