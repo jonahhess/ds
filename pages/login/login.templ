@@ -1,14 +1,12 @@
 package login
 
 import (
+	"myapp/auth"
 	"myapp/components/toast"
-	"myapp/utils"
 )
 
-templ Login(errMsg string) {
-	if utils.IsLoggedIn(ctx) {
-		<h1>You are logged in!</h1>
-	} else {
+templ Login(errMsg string, next string) {
+	if _, ok := auth.UserIDFromContext(ctx); !ok {
 		<h1>Login Guest</h1>
 		<form action="/login" method="post">
 			<label for="email">Email</label>
@@ -17,6 +15,8 @@ templ Login(errMsg string) {
 			<input name="password" type="text" required/>
 			<button type="submit">Submit</button>
 		</form>
-		@toast.Toast(errMsg)
+	} else {
+		<h1>You are logged in!</h1>
 	}
+	@toast.Toast(errMsg)
 }

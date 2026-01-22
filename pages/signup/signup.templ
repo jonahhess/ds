@@ -1,8 +1,8 @@
 package signup
 
 import (
+	"myapp/auth"
 	"myapp/components/toast"
-	"myapp/utils"
 )
 
 type UserSignup struct {
@@ -12,9 +12,7 @@ type UserSignup struct {
 }
 
 templ Signup(errMsg string) {
-	if utils.IsLoggedIn(ctx) {
-		<h1>You are logged in!</h1>
-	} else {
+	if _, ok := auth.UserIDFromContext(ctx); !ok {
 		<h1>Signup</h1>
 		<form action="/signup" method="post">
 			<label for="name">Name</label>
@@ -25,6 +23,8 @@ templ Signup(errMsg string) {
 			<input type="text" name="password" required/>
 			<button type="submit">Submit</button>
 		</form>
+	} else {
+		<h1>You are logged in!</h1>
 		@toast.Toast(errMsg)
 	}
 }

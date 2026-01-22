@@ -1,13 +1,13 @@
 package home
 
-import utils "myapp/utils"
+import "myapp/auth"
 
 templ Home() {
-	if utils.IsLoggedIn(ctx) {
+	if _, ok := auth.UserIDFromContext(ctx); !ok {
+		<h1>Hello Guest</h1>
+	} else {
 		<h1>Hello User</h1>
 		<a href="/study">Study</a>
 		<a href="/review">Review</a>
-	} else {
-		<h1>Hello Guest</h1>
 	}
 }
