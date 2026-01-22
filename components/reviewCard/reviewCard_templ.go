@@ -18,7 +18,7 @@ type Answer struct {
 	Text string
 }
 
-func ReviewCard(questionID int, question string, answers []types.Answer) templ.Component {
+func ReviewCard(questionID int, question string, answers [2]types.Answer) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -40,7 +40,7 @@ func ReviewCard(questionID int, question string, answers []types.Answer) templ.C
 		}
 		ctx = templ.ClearChildren(ctx)
 		if questionID > 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<form method=\"POST\" action=\"/review/answer\"><input type=\"hidden\" name=\"question_id\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<form method=\"POST\" action=\"/review/submit\"><input type=\"hidden\" name=\"question_id\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
