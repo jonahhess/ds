@@ -1,14 +1,7 @@
 package review
 
-import (
-	"database/sql"
-	"myapp/utils"
-)
+import "database/sql"
 
 templ Review(DB *sql.DB) {
-	if utils.IsLoggedIn(ctx) {
-		<h1>All Review</h1>
-	} else {
-		<h1>Please log in to continue</h1>
-	}
+	<h1>All Review</h1>
 }

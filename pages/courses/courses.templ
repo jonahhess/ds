@@ -1,15 +1,8 @@
 package courses
 
-import (
-	"database/sql"
-	"myapp/utils"
-)
+import "database/sql"
 
 templ Courses(DB *sql.DB) {
-	if utils.IsLoggedIn(ctx) {
-		<h1>All Courses</h1>
-		{{ GetAllCourses(ctx, DB) }}
-	} else {
-		<h1>Please log in to continue</h1>
-	}
+	<h1>All Courses</h1>
+	{{ GetAllCourses(ctx, DB) }}
 }

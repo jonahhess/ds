@@ -1,13 +1,11 @@
 package template
 
-import (
-	"myapp/utils"
-)
+import "myapp/auth"
 
 templ Template() {
-	if utils.IsLoggedIn(ctx) {
-		<h1>Template User</h1>
-	} else {
+	if _, ok := auth.UserIDFromContext(ctx); !ok {
 		<h1>Template Guest</h1>
+	} else {
+		<h1>Template User</h1>
 	}
 }
