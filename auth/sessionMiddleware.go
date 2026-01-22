@@ -1,8 +1,7 @@
-package middlewares
+package auth
 
 import (
 	"context"
-	"myapp/utils"
 	"net/http"
 
 	"github.com/gorilla/sessions"
@@ -17,7 +16,7 @@ func SessionMiddleware(store *sessions.CookieStore) func(http.Handler) http.Hand
 				session, _ = store.New(r, "myapp-session")
 			}
 
-			ctx := context.WithValue(r.Context(), utils.SessionContextKey, session)
+			ctx := context.WithValue(r.Context(), SessionContextKey, session)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
