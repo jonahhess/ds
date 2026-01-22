@@ -3,7 +3,6 @@ package review
 import (
 	"database/sql"
 	"myapp/auth"
-	pleaseLogin "myapp/components/pleaseLogin"
 	reviewcard "myapp/components/reviewCard"
 	"myapp/layouts"
 	"myapp/types"
@@ -16,7 +15,7 @@ func Page(DB *sql.DB) http.HandlerFunc {
 	ctx := r.Context()
 	userID, ok := auth.UserIDFromContext(ctx)
 	if !ok {
-		layouts.Base("login", pleaseLogin.PleaseLogin()).Render(ctx, w)
+		http.Redirect(w,r,"/login",401)
 		return
 	}
 
