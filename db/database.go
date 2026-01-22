@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"log"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -32,6 +33,14 @@ func CloseDB() error {
 	return nil
 }
 
+func execSQL(db *sql.DB, sqlStmt string) {
+    _, err := db.Exec(sqlStmt)
+    if err != nil {
+        log.Fatalf("Error executing SQL: %v\nSQL:\n%s", err, sqlStmt)
+    }
+  }
+
+
 func CreateTables() error {
 	users := `
 	CREATE TABLE IF NOT EXISTS users (
@@ -42,21 +51,26 @@ func CreateTables() error {
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
     `
-
-	DB.Exec(users)
-
 	courses := `
 	CREATE TABLE IF NOT EXISTS courses (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   title TEXT NOT NULL,
   description TEXT,
   created_by INTEGER NOT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (created_by) REFERENCES users(id)
 
 );
     `
- DB.Exec(courses)
+
+   user_courses := `
+	CREATE TABLE IF NOT EXISTS user_courses (
+  user_id INTEGER NOT NULL,
+  course_id INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (course_id) REFERENCES courses(id)
+);
+    `
 
  	lessons := `
 	CREATE TABLE IF NOT EXISTS lessons (
@@ -65,12 +79,11 @@ func CreateTables() error {
   title TEXT NOT NULL,
   text TEXT NOT NULL,
   created_by INTEGER NOT NULL,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
   FOREIGN KEY (created_by) REFERENCES users(id)
 );
     `
- DB.Exec(lessons);
 
   quizzes := `
 	CREATE TABLE IF NOT EXISTS quizzes (
@@ -79,7 +92,6 @@ func CreateTables() error {
   FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE
 );
     `
- DB.Exec(quizzes);
 
   questions := `
 	CREATE TABLE IF NOT EXISTS questions (
@@ -92,7 +104,6 @@ func CreateTables() error {
   FOREIGN KEY (created_by) REFERENCES users(id)
 );
     `
- DB.Exec(questions);
 
   answers := `
 	CREATE TABLE IF NOT EXISTS answers (
@@ -103,7 +114,6 @@ func CreateTables() error {
 
 );
     `
- DB.Exec(answers);
 
   correct_answers := `
 	CREATE TABLE IF NOT EXISTS correct_answers (
@@ -113,25 +123,30 @@ func CreateTables() error {
   FOREIGN KEY (answer_id) REFERENCES answers(id)
 );
     `
- DB.Exec(correct_answers);
 
   reviewcards := `
   CREATE TABLE IF NOT EXISTS reviewcards (
-  id INTEGER PRIMARY KEY,
-  user_id INTEGER NOT NULL,
-  question_id INTEGER NOT NULL,
-  review_at DATETIME (datetime('now', '+1 day')),
-  consecutive_successes INTEGER DEFAULT 0 CHECK (consecutive_successes >= 0),
-  successes INTEGER DEFAULT 0 CHECK (successes >= 0),
-  reviews INTEGER DEFAULT 0 CHECK (reviews >= 0),
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE (user_id, question_id),
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    question_id INTEGER NOT NULL,
+    review_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    interval INTEGER DEFAULT 1 CHECK(interval > 0),
+    easiness REAL DEFAULT 2.5 CHECK(easiness >= 1.3),
+    repetitions INTEGER DEFAULT 0 CHECK(repetitions >= 0),
+    successes INTEGER DEFAULT 0 CHECK(successes >= 0),
+    reviews INTEGER DEFAULT 0 CHECK(reviews >= 0),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, question_id),
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY(question_id) REFERENCES questions(id) ON DELETE CASCADE
 );
 
     `
- DB.Exec(reviewcards);
 
+    tables := []string{users,courses,user_courses,lessons,quizzes,questions,answers,correct_answers,reviewcards}
+
+    for _, tbl := range tables {
+        execSQL(DB, tbl)
+    }
 	return nil
 }
