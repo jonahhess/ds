@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"myapp/auth"
 	"myapp/layouts"
+	"myapp/types"
 	"net/http"
 )
 
@@ -28,20 +29,20 @@ func Page(DB *sql.DB) http.HandlerFunc {
 	}
 }
 
-func GetAllMyCourseTitles(DB *sql.DB, userID int) ([]string, error){
-	rows, err := DB.Query("SELECT c.title FROM user_courses uc INNER JOIN courses c ON c.id = uc.course_id WHERE user_id = ?", userID)
+func GetAllMyCourseTitles(DB *sql.DB, userID int) ([]types.Item, error){
+	rows, err := DB.Query("SELECT c.id, c.title FROM user_courses uc INNER JOIN courses c ON c.id = uc.course_id WHERE user_id = ?", userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	
-	var titles []string
+	var titles []types.Item
 	for rows.Next() {
-		var title string
-		if err := rows.Scan(&title); err != nil {
+		var item types.Item
+		if err := rows.Scan(&item.ID, &item.Text); err != nil {
 			return titles, err
 		}
-		titles = append(titles, title)
+		titles = append(titles, item)
 	}
 	if err = rows.Err(); err != nil {
 		return titles, err

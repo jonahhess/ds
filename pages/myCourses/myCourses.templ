@@ -1,8 +1,14 @@
 package myCourses
 
-templ MyCourses(courses []string) {
+import (
+	"fmt"
+	"myapp/types"
+	"myapp/utils"
+)
+
+templ MyCourses(courses []types.Item) {
 	<h1>All My Courses</h1>
 	for _, v := range courses {
-		<p>{ v }</p>
+		<a href={ utils.UserLink(ctx, fmt.Sprintf("courses/%d", v.ID)) }>{ v.Text }</a>
 	}
 }
