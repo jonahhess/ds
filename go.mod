@@ -1,4 +1,4 @@
-module myapp
+module "github.com/jonahhess/ds"
 
 go 1.25.4
 

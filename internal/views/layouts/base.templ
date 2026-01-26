@@ -1,0 +1,31 @@
+package layouts
+
+import (
+	"context"
+	"myapp/internal/views/components/navbar"
+)
+
+func GetUser(ctx context.Context) string {
+	if user, ok := ctx.Value("user").(string); ok {
+		return user
+	}
+	return ""
+}
+
+templ Base(page string, content templ.Component) {
+	<!DOCTYPE html>
+	<html>
+		<head>
+			<title>{ page }</title>
+			<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
+			<link rel="stylesheet" href="/static/reset.css"/>
+			<script defer type="module" src="/static/datastar.js"></script>
+			<link rel="stylesheet" href="/static/components/navbar/navbar.css"/>
+			@PageStyles(page)
+		</head>
+		<body>
+			@navbar.Navbar()
+			@content
+		</body>
+	</html>
+}

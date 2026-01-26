@@ -1,0 +1,11 @@
+package template
+
+import "myapp/internal/auth"
+
+templ Template() {
+	if _, ok := auth.UserIDFromContext(ctx); !ok {
+		<h1>Template Guest</h1>
+	} else {
+		<h1>Template User</h1>
+	}
+}

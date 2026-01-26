@@ -1,0 +1,22 @@
+package login
+
+import (
+	"myapp/internal/auth"
+	"myapp/internal/views/components/toast"
+)
+
+templ Login(errMsg string) {
+	if _, ok := auth.UserIDFromContext(ctx); !ok {
+		<h1>Login Guest</h1>
+		<form action="/login" method="post">
+			<label for="email">Email</label>
+			<input name="email" type="email" required/>
+			<label for="password">Password</label>
+			<input name="password" type="text" required/>
+			<button type="submit">Submit</button>
+		</form>
+	} else {
+		<h1>You are logged in!</h1>
+	}
+	@toast.Toast(errMsg)
+}

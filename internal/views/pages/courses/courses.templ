@@ -1,0 +1,13 @@
+package courses
+
+import (
+	"fmt"
+	"myapp/internal/types"
+)
+
+templ Courses(courses []types.Item) {
+	<h1>All Courses</h1>
+	for _, v := range courses {
+		<a href={ fmt.Sprintf("courses/%d", v.ID) }>{ v.Text }</a>
+	}
+}
