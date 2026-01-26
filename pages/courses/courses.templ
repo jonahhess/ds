@@ -1,8 +1,8 @@
 package courses
 
-import "database/sql"
-
-templ Courses(DB *sql.DB) {
+templ Courses(courses []string) {
 	<h1>All Courses</h1>
-	{{ GetAllCourses(ctx, DB) }}
+	for _, v := range courses {
+		<p>{ v }</p>
+	}
 }
