@@ -117,10 +117,10 @@ func CreateTables() error {
 
   correct_answers := `
 	CREATE TABLE IF NOT EXISTS correct_answers (
-  question_id INTEGER NOT NULL,
-  answer_id INTEGER NOT NULL,
+  question_id INTEGER PRIMARY KEY,
+  answer_id INTEGER NOT NULL UNIQUE,
   FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE,
-  FOREIGN KEY (answer_id) REFERENCES answers(id)
+  FOREIGN KEY (answer_id) REFERENCES answers(id) ON DELETE CASCADE
 );
     `
 
