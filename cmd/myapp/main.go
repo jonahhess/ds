@@ -9,9 +9,11 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gorilla/sessions"
+
+	"github.com/joho/godotenv"
 	"github.com/jonahhess/ds/internal/db"
 	"github.com/jonahhess/ds/internal/router"
-	sessions "github.com/jonahhess/ds/internal/sessionStore"
 )
 
 func main() {
@@ -22,7 +24,18 @@ func main() {
 	)
 	defer stop()
 
-	if err := db.InitDB("internal/db/myapp.db"); err != nil {
+	var envs map[string]string
+	envs, err := godotenv.Read(".env")
+
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	authKey := envs["AUTH_KEY"]
+	encKey := envs["ENC_KEY"]
+	path := envs["MYAPP_DB_PATH"]
+
+	if err := db.InitDB(path); err != nil {
 		log.Fatalf("database init failed: %v", err)
 	}
 
@@ -32,8 +45,20 @@ func main() {
 
 	defer db.CloseDB()
 
-	sess := sessions.InitStore()
-	r := router.SetupRoutes(sess, db.DB)
+	store := sessions.NewCookieStore(
+		[]byte(authKey),
+		[]byte(encKey),
+	)
+
+	store.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   86400 * 7,
+		HttpOnly: true,
+		Secure:   false, // false only for localhost
+		SameSite: http.SameSiteLaxMode,
+	}
+
+	r := router.SetupRoutes(store, db.DB)
 
 	// --- server ---
 	srv := &http.Server{
