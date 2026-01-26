@@ -3,6 +3,7 @@ package courses
 import (
 	"database/sql"
 	"myapp/layouts"
+	"myapp/types"
 	"net/http"
 )
 
@@ -18,20 +19,20 @@ func Page(DB *sql.DB) http.HandlerFunc {
 	}
 }
 
-func GetAllCourseTitles(DB *sql.DB) ([]string, error){
-	rows, err := DB.Query("SELECT title FROM courses")
+func GetAllCourseTitles(DB *sql.DB) ([]types.Item, error){
+	rows, err := DB.Query("SELECT id, title FROM courses")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	
-	var titles []string
+	var titles []types.Item
 	for rows.Next() {
-		var title string
-		if err := rows.Scan(&title); err != nil {
+		var item types.Item
+		if err := rows.Scan(&item.ID, &item.Text); err != nil {
 			return titles, err
 		}
-		titles = append(titles, title)
+		titles = append(titles, item)
 	}
 	if err = rows.Err(); err != nil {
 		return titles, err
