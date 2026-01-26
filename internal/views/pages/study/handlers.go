@@ -1,9 +1,10 @@
 package study
 
 import (
-	"myapp/internal/auth"
-	"myapp/internal/views/layouts"
 	"net/http"
+
+	"github.com/jonahhess/ds/internal/auth"
+	"github.com/jonahhess/ds/internal/views/layouts"
 )
 
 func Page(w http.ResponseWriter, r *http.Request) {

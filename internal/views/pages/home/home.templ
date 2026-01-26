@@ -1,6 +1,6 @@
 package home
 
-import "myapp/internal/auth"
+import "github.com/jonahhess/ds/internal/auth"
 
 templ Home() {
 	if _, ok := auth.UserIDFromContext(ctx); !ok {

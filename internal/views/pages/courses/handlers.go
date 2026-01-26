@@ -2,9 +2,10 @@ package courses
 
 import (
 	"database/sql"
-	"myapp/internal/types"
-	"myapp/internal/views/layouts"
 	"net/http"
+
+	"github.com/jonahhess/ds/internal/types"
+	"github.com/jonahhess/ds/internal/views/layouts"
 )
 
 func Page(DB *sql.DB) http.HandlerFunc {

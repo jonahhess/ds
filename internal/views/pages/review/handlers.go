@@ -3,11 +3,12 @@ package review
 import (
 	"database/sql"
 	"encoding/json"
-	"myapp/internal/types"
-	reviewcard "myapp/internal/views/components/reviewCard"
-	"myapp/internal/views/layouts"
 	"net/http"
 	"time"
+
+	"github.com/jonahhess/ds/internal/types"
+	reviewcard "github.com/jonahhess/ds/internal/views/components/reviewCard"
+	"github.com/jonahhess/ds/internal/views/layouts"
 )
 
 type ReviewCard struct {

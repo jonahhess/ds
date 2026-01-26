@@ -2,10 +2,11 @@ package myCourses
 
 import (
 	"database/sql"
-	"myapp/internal/auth"
-	"myapp/internal/types"
-	"myapp/internal/views/layouts"
 	"net/http"
+
+	"github.com/jonahhess/ds/internal/auth"
+	"github.com/jonahhess/ds/internal/types"
+	"github.com/jonahhess/ds/internal/views/layouts"
 )
 
 func Page(DB *sql.DB) http.HandlerFunc {

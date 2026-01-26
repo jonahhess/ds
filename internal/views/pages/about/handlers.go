@@ -1,8 +1,9 @@
 package about
 
 import (
-	"myapp/internal/views/layouts"
 	"net/http"
+
+	"github.com/jonahhess/ds/internal/views/layouts"
 )
 
 func Page(w http.ResponseWriter, r *http.Request) {

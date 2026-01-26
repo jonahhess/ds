@@ -1,6 +1,6 @@
 package template
 
-import "myapp/internal/auth"
+import "github.com/jonahhess/ds/internal/auth"
 
 templ Template() {
 	if _, ok := auth.UserIDFromContext(ctx); !ok {

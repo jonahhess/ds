@@ -1,8 +1,9 @@
 package auth
 
 import (
-	"myapp/internal/db"
 	"net/http"
+
+	"github.com/jonahhess/ds/internal/db"
 )
 
 const sessionUserIDKey = "user_id"
