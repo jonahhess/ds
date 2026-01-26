@@ -1,8 +1,0 @@
-package template
-
-import "database/sql"
-
-templ Template(DB *sql.DB) {
-	<h1>All Template</h1>
-	{{ GetAllTemplate(ctx, DB) }}
-}
