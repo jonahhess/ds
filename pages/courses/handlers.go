@@ -26,17 +26,17 @@ func GetAllCourseTitles(DB *sql.DB) ([]types.Item, error){
 	}
 	defer rows.Close()
 	
-	var titles []types.Item
+	var items []types.Item
 	for rows.Next() {
 		var item types.Item
 		if err := rows.Scan(&item.ID, &item.Text); err != nil {
-			return titles, err
+			return items, err
 		}
-		titles = append(titles, item)
+		items = append(items, item)
 	}
 	if err = rows.Err(); err != nil {
-		return titles, err
+		return items, err
 	}
 
-	return titles, nil
+	return items, nil
 }
