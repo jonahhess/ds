@@ -1,9 +1,9 @@
 package study
 
-import "myapp/utils"
+import "fmt"
 
-templ Study() {
+templ Study(userID int) {
 	<h1>Study</h1>
-	<a href={ utils.UserLink(ctx, "courses") }>My Courses</a>
+	<a href={ fmt.Sprintf("/users/%d/courses", userID) }>My Courses</a>
 	<a href="/courses">All Courses</a>
 }
