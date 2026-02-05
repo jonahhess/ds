@@ -7,9 +7,11 @@ import (
 
 	"github.com/jonahhess/ds/internal/auth"
 	about "github.com/jonahhess/ds/internal/views/pages/about"
+	"github.com/jonahhess/ds/internal/views/pages/course"
 	"github.com/jonahhess/ds/internal/views/pages/courses"
 	home "github.com/jonahhess/ds/internal/views/pages/home"
 	"github.com/jonahhess/ds/internal/views/pages/login"
+	"github.com/jonahhess/ds/internal/views/pages/myCourse"
 	"github.com/jonahhess/ds/internal/views/pages/myCourses"
 	"github.com/jonahhess/ds/internal/views/pages/notFound"
 	"github.com/jonahhess/ds/internal/views/pages/review"
@@ -48,6 +50,7 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 	r.Group(func(r chi.Router) {
 		r.Use(auth.RequireAuthMiddleware)
 		r.Get("/study", study.Page)
+		r.Get("/courses/{courseID}", course.Page(DB))
 		r.Get("/courses",courses.Page(DB))
 		r.Route("/review", func(r chi.Router) {
 			r.Get("/", review.Page(DB))
@@ -56,25 +59,26 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 		})
 
 		r.Route("/users/{userID}", func(r chi.Router) {
+			r.Get("/courses/{courseID}", myCourse.Page(DB))
 			r.Get("/courses", myCourses.Page(DB))
 		})
 	})
 
 	r.Handle("/static/*",
 		http.StripPrefix("/static/",
-			http.FileServer(http.Dir("./static")),
+			http.FileServer(http.Dir("./cmd/myapp/static")),
 		),
 	)
 
 	r.Handle("/static/pages/*",
 		http.StripPrefix("/static/pages/",
-			http.FileServer(http.Dir("./pages")),
+			http.FileServer(http.Dir("./internal/views/pages")),
 		),
 	)
 
 	r.Handle("/static/components/*",
 		http.StripPrefix("/static/components/",
-			http.FileServer(http.Dir("./components")),
+			http.FileServer(http.Dir("./internal/views/components")),
 		),
 	)
 
