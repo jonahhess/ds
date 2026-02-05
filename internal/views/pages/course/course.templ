@@ -1,0 +1,21 @@
+package course
+
+import (
+	"fmt"
+	"github.com/jonahhess/ds/internal/types"
+	"strings"
+)
+
+templ Course(userID int, courseID int, data types.CourseData) {
+	<h1>{ data.Title }</h1>
+	<div id="lessons">
+		for idx, title := range strings.Split(data.Lessons, ";") {
+			<p>{ idx }: { title }</p>
+		}
+	</div>
+	if (data.UserCurrentlyEnrolled) {
+		<a href={ fmt.Sprintf("/users/%d/courses/%d", userID, courseID) }>Go to Course</a>
+	} else {
+		<a href={ fmt.Sprintf("/courses/%d/enroll", data.CourseID) }>Start Course</a>
+	}
+}
