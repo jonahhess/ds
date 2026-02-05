@@ -59,14 +59,15 @@ func CreateTables() error {
   created_by INTEGER NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (created_by) REFERENCES users(id)
-
 );
     `
 
-   user_courses := `
+  user_courses := `
 	CREATE TABLE IF NOT EXISTS user_courses (
   user_id INTEGER NOT NULL,
   course_id INTEGER NOT NULL,
+  current_lesson INTEGER DEFAULT 0,
+  PRIMARY KEY (user_id, course_id),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (course_id) REFERENCES courses(id)
 );
@@ -76,6 +77,7 @@ func CreateTables() error {
 	CREATE TABLE IF NOT EXISTS lessons (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   course_id INTEGER NOT NULL,
+  lesson_index INTEGER NOT NULL, // note: not null is not in current db setup
   title TEXT NOT NULL,
   text TEXT NOT NULL,
   created_by INTEGER NOT NULL,
@@ -148,5 +150,31 @@ func CreateTables() error {
     for _, tbl := range tables {
         execSQL(DB, tbl)
     }
+
+        _, err := DB.Exec(`
+    CREATE TRIGGER IF NOT EXISTS validate_current_lesson_insert
+    BEFORE INSERT ON user_courses
+    FOR EACH ROW
+    BEGIN
+        SELECT CASE
+            WHEN NEW.current_lesson > (SELECT COUNT(*) FROM lessons WHERE course_id = NEW.course_id)
+            THEN RAISE(ABORT, 'current_lesson cannot exceed total lessons')
+        END;
+    END;
+
+    CREATE TRIGGER IF NOT EXISTS validate_current_lesson_update
+    BEFORE UPDATE ON user_courses
+    FOR EACH ROW
+    BEGIN
+        SELECT CASE
+            WHEN NEW.current_lesson > (SELECT COUNT(*) FROM lessons WHERE course_id = NEW.course_id)
+            THEN RAISE(ABORT, 'current_lesson cannot exceed total lessons')
+        END;
+    END;
+`)
+if err != nil {
+    log.Fatal(err)
+}
+
 	return nil
 }
