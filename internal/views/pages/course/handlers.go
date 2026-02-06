@@ -53,12 +53,12 @@ func Page(DB *sql.DB) http.HandlerFunc {
 			c.description,
 			u.name,
 			u.created_at,
-			(
-				SELECT GROUP_CONCAT(l.title, '; ')
-				FROM lessons l
-				WHERE l.course_id = c.id
-				ORDER BY l.lesson_index ASC
-			) AS lesson_titles,
+			COALESCE((
+            SELECT GROUP_CONCAT(l.title, '; ')
+            FROM lessons l
+            WHERE l.course_id = c.id
+            ORDER BY l.lesson_index ASC
+        ), '') AS lesson_titles,
 			EXISTS (
 				SELECT 1
 				FROM user_courses
