@@ -8,11 +8,13 @@ import (
 
 templ Course(userID int, courseID int, data types.CourseData) {
 	<h1>{ data.Title }</h1>
-	<div id="lessons">
-		for idx, title := range strings.Split(data.Lessons, ";") {
-			<p>{ idx }: { title }</p>
+	<ol>
+		for _, title := range strings.Split(data.Lessons, ";") {
+			<li>
+				<p>{ title }</p>
+			</li>
 		}
-	</div>
+	</ol>
 	if (data.UserCurrentlyEnrolled) {
 		<a href={ fmt.Sprintf("/users/%d/courses/%d", userID, courseID) }>Go to Course</a>
 	} else {
