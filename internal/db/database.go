@@ -77,7 +77,7 @@ func CreateTables() error {
 	CREATE TABLE IF NOT EXISTS lessons (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   course_id INTEGER NOT NULL,
-  lesson_index INTEGER NOT NULL, // note: not null is not in current db setup
+  lesson_index INTEGER NOT NULL,
   title TEXT NOT NULL,
   text TEXT NOT NULL,
   created_by INTEGER NOT NULL,
