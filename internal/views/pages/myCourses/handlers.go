@@ -23,7 +23,7 @@ func Page(DB *sql.DB) http.HandlerFunc {
 	}
 
 	 if err := layouts.
-	 Base("MyCourses", MyCourses(userID, myTitles)).
+	 Base("My Courses", MyCourses(userID, myTitles)).
 	 Render(r.Context(), w);  err != nil {
 		 http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
@@ -31,7 +31,7 @@ func Page(DB *sql.DB) http.HandlerFunc {
 }
 
 func GetAllMyCourseTitles(DB *sql.DB, userID int) ([]types.Item, error){
-	rows, err := DB.Query("SELECT c.id, c.title FROM user_courses uc INNER JOIN courses c ON c.id = uc.course_id WHERE user_id = ?", userID)
+	rows, err := DB.Query("SELECT c.id, c.title FROM user_courses uc INNER JOIN courses c ON c.id = uc.course_id WHERE uc.user_id = ?", userID)
 	if err != nil {
 		return nil, err
 	}
