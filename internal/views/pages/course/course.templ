@@ -3,6 +3,7 @@ package course
 import (
 	"fmt"
 	"github.com/jonahhess/ds/internal/types"
+	"strconv"
 	"strings"
 )
 
@@ -20,6 +21,10 @@ templ Course(userID int, courseID int, data types.CourseData) {
 	if (data.UserCurrentlyEnrolled) {
 		<a href={ fmt.Sprintf("/users/%d/courses/%d", userID, courseID) }>Go to Course</a>
 	} else {
-		<a href={ fmt.Sprintf("/courses/%d/enroll", data.CourseID) }>Start Course</a>
+		<button data-indicator:fetching data-on:click={ "@post('/courses/" + strconv.Itoa(courseID) + "/enroll')" } data-show="!$fetching">
+			Start Course
+		</button>
+		<p data-show="$fetching" style="display: none">Loading...</p>
 	}
+	<a href="/courses">All Courses</a>
 }
