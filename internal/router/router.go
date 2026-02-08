@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/jonahhess/ds/internal/auth"
+	"github.com/jonahhess/ds/internal/params"
 	about "github.com/jonahhess/ds/internal/views/pages/about"
 	"github.com/jonahhess/ds/internal/views/pages/course"
 	"github.com/jonahhess/ds/internal/views/pages/courses"
@@ -50,8 +51,11 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 	r.Group(func(r chi.Router) {
 		r.Use(auth.RequireAuthMiddleware)
 		r.Route("/courses", func(r chi.Router) {
-			r.Post("/{courseID}/enroll", course.Enroll(DB))
-			r.Get("/{courseID}", course.Page(DB))
+			r.Route("/{courseID}", func(r chi.Router) {
+				r.Use(params.Int("courseID"))
+				r.Post("/enroll", course.Enroll(DB))
+				r.Get("/", course.Page(DB))
+			})
 			r.Get("/",courses.Page(DB))
 		})
 		r.Get("/study", study.Page)
@@ -62,8 +66,14 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 		})
 
 		r.Route("/users/{userID}", func(r chi.Router) {
-			r.Get("/courses/{courseID}", myCourse.Page(DB))
-			r.Get("/courses", myCourses.Page(DB))
+			r.Use(auth.RequireAuthMiddleware)
+			r.Route("/courses", func(r chi.Router) {
+				r.Route("/{courseID}", func(r chi.Router) {
+					r.Use(params.Int("courseID"))
+					r.Get("/", myCourse.Page(DB))
+				})
+				r.Get("/", myCourses.Page(DB))
+			})
 		})
 	})
 
