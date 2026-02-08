@@ -35,7 +35,7 @@ func Login(errMsg string) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		if _, ok := auth.UserIDFromContext(ctx); !ok {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1>Login Guest</h1><form action=\"/login\" method=\"post\"><label for=\"email\">Email</label> <input name=\"email\" type=\"email\" required> <label for=\"password\">Password</label> <input name=\"password\" type=\"text\" required> <button type=\"submit\">Submit</button></form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1>Login Guest</h1><form action=\"/login\" method=\"post\"><label for=\"email\">Email</label> <input id=\"email\" type=\"email\" autocomplete=\"name\" name=\"email\" required> <label for=\"password\">Password</label> <input id=\"password\" type=\"text\" autocomplete=\"current-password\" name=\"password\" required> <button type=\"submit\">Submit</button></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

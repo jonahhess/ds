@@ -41,7 +41,7 @@ func Signup(errMsg string) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		if _, ok := auth.UserIDFromContext(ctx); !ok {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1>Signup</h1><form action=\"/signup\" method=\"post\"><label for=\"name\">Name</label> <input name=\"name\" type=\"text\" required> <label for=\"email\">Email</label> <input type=\"text\" name=\"email\" required> <label for=\"password\">Password</label> <input type=\"text\" name=\"password\" required> <button type=\"submit\">Submit</button></form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1>Signup</h1><form action=\"/signup\" method=\"post\"><label for=\"name\">Name</label> <input id=\"name\" type=\"text\" autocomplete=\"name\" name=\"name\" required> <label for=\"email\">Email</label> <input type=\"text\" id=\"email\" autocomplete=\"email\" name=\"email\" required> <label for=\"password\">Password</label> <input type=\"text\" id=\"password\" name=\"password\" autocomplete=\"new-password\" required> <button type=\"submit\">Submit</button></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -50,10 +50,10 @@ func Signup(errMsg string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = toast.Toast(errMsg).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		}
+		templ_7745c5c3_Err = toast.Toast(errMsg).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
 		}
 		return nil
 	})

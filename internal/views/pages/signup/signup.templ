@@ -16,15 +16,15 @@ templ Signup(errMsg string) {
 		<h1>Signup</h1>
 		<form action="/signup" method="post">
 			<label for="name">Name</label>
-			<input name="name" type="text" required/>
+			<input id="name" type="text" autocomplete="name" name="name" required/>
 			<label for="email">Email</label>
-			<input type="text" name="email" required/>
+			<input type="text" id="email" autocomplete="email" name="email" required/>
 			<label for="password">Password</label>
-			<input type="text" name="password" required/>
+			<input type="text" id="password" name="password" autocomplete="new-password" required/>
 			<button type="submit">Submit</button>
 		</form>
 	} else {
 		<h1>You are logged in!</h1>
-		@toast.Toast(errMsg)
 	}
+	@toast.Toast(errMsg)
 }
