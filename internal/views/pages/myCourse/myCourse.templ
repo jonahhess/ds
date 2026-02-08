@@ -14,4 +14,5 @@ templ MyCourse(userID int, courseData types.MyCourseData) {
 	</div>
 	<a href={ fmt.Sprintf("/users/%d/courses/%d/start", userID, courseData.CourseID) }>Start Course</a>
 	<a href={ fmt.Sprintf("/courses/%d", courseData.CourseID) }>Course Page</a>
+	<a href={ fmt.Sprintf("/users/%d/courses", userID) }>My Courses</a>
 }
