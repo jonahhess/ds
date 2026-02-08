@@ -21,7 +21,7 @@ func Page(DB *sql.DB) http.HandlerFunc {
 
 	courseIDStr := chi.URLParam(r, "courseID")
     if !ok {
-        http.Error(w, "course id missing from context", http.StatusBadRequest)
+        http.Error(w, "course id missing from url", http.StatusBadRequest)
         return
     }
 
@@ -85,5 +85,44 @@ func Page(DB *sql.DB) http.HandlerFunc {
     }
 
     return &data, nil
+}
+
+func Enroll(DB *sql.DB) http.HandlerFunc {
+ return func(w http.ResponseWriter, r *http.Request) {
+	 ctx := r.Context()
+	 userID, ok := auth.UserIDFromContext(ctx)
+	 if !ok {
+		 return
+		}
+		
+		courseIDStr := chi.URLParam(r, "courseID")
+		if !ok {
+			http.Error(w, "course id missing from context", http.StatusBadRequest)
+			return
+		}
+		
+		courseID, err := strconv.Atoi(courseIDStr)
+        if err != nil {
+			http.Error(w, "invalid course id", http.StatusBadRequest)
+            return
+        }
+	
+		
+		if _, err := DB.Exec("INSERT INTO user_courses (user_id, course_id, current_lesson) VALUES (?, ?, 0)", userID, courseID); err != nil {
+			http.Error(w, "Enroll error: ", http.StatusConflict)
+			return
+		}
+
+		myData, err := GetCourseData(DB, userID, courseID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+
+		if err := layouts.
+		Base("Course", Course(userID, courseID, *myData)).
+		Render(r.Context(), w);  err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	}
 }
 
