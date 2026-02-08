@@ -3,10 +3,9 @@ package course
 import (
 	"database/sql"
 	"net/http"
-	"strconv"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/jonahhess/ds/internal/auth"
+	"github.com/jonahhess/ds/internal/params"
 	"github.com/jonahhess/ds/internal/types"
 	"github.com/jonahhess/ds/internal/views/layouts"
 )
@@ -14,22 +13,17 @@ import (
 func Page(DB *sql.DB) http.HandlerFunc {
  return func(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	
 	userID, ok := auth.UserIDFromContext(ctx)
 	if !ok {
 		return
 	}
 
-	courseIDStr := chi.URLParam(r, "courseID")
-    if !ok {
-        http.Error(w, "course id missing from url", http.StatusBadRequest)
-        return
-    }
-
-	courseID, err := strconv.Atoi(courseIDStr)
-        if err != nil {
-            http.Error(w, "invalid course id", http.StatusBadRequest)
-            return
-        }
+	courseID, ok := params.IntFrom(r.Context(), "courseID")
+		if !ok {
+			http.Error(w, "course id not found", http.StatusInternalServerError)
+			return
+		}
 
 	myData, err := GetCourseData(DB, userID, courseID)
 	if err != nil {
@@ -90,18 +84,13 @@ func Enroll(DB *sql.DB) http.HandlerFunc {
 		ctx := r.Context()
 		userID, ok := auth.UserIDFromContext(ctx)
 		if !ok {
+				http.Error(w, "invalid user id", http.StatusInternalServerError)
 				return
 			}
 			
-		courseIDStr := chi.URLParam(r, "courseID")
+		courseID, ok := params.IntFrom(r.Context(), "courseID")
 		if !ok {
-			http.Error(w, "course id missing from context", http.StatusBadRequest)
-			return
-		}
-
-		courseID, err := strconv.Atoi(courseIDStr)
-		if err != nil {
-			http.Error(w, "invalid course id", http.StatusBadRequest)
+			http.Error(w, "course id not found", http.StatusInternalServerError)
 			return
 		}
 
