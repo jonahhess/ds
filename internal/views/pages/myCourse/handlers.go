@@ -20,6 +20,23 @@ func Page(DB *sql.DB) http.HandlerFunc {
 	if !ok {
 		return
 	}
+
+	userIDStrFromURL := chi.URLParam(r, "userID")
+	if !ok {
+		http.Error(w, "invalid user id", http.StatusBadRequest)
+		return
+	}
+	
+	userIDFromURL, err := strconv.Atoi(userIDStrFromURL)
+	if err != nil {
+		http.Error(w, "invalid user id", http.StatusBadRequest)
+		return
+	}
+
+	if userID != userIDFromURL {
+		http.Error(w, "invalid user id", http.StatusBadRequest)
+		return
+	}
 	
 	courseIDStr := chi.URLParam(r, "courseID")
     if !ok {
@@ -32,7 +49,6 @@ func Page(DB *sql.DB) http.HandlerFunc {
             http.Error(w, "invalid course id", http.StatusBadRequest)
             return
         }
-
 
 	myCourseData, err := GetMyCourseData(DB, userID, courseID)
 	if err != nil {
