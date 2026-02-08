@@ -88,7 +88,7 @@ func Enroll(DB *sql.DB) http.HandlerFunc {
 				return
 			}
 			
-		courseID, ok := params.IntFrom(r.Context(), "courseID")
+		courseID, ok := params.IntFrom(ctx, "courseID")
 		if !ok {
 			http.Error(w, "course id not found", http.StatusInternalServerError)
 			return
