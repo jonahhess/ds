@@ -27,6 +27,7 @@ import (
 func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 	r := chi.NewRouter()
 
+	r.Use(middleware.RedirectSlashes)
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
