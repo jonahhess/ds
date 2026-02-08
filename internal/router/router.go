@@ -49,9 +49,12 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 	
 	r.Group(func(r chi.Router) {
 		r.Use(auth.RequireAuthMiddleware)
+		r.Route("/courses", func(r chi.Router) {
+			r.Post("/{courseID}/enroll", course.Enroll(DB))
+			r.Get("/{courseID}", course.Page(DB))
+			r.Get("/",courses.Page(DB))
+		})
 		r.Get("/study", study.Page)
-		r.Get("/courses/{courseID}", course.Page(DB))
-		r.Get("/courses",courses.Page(DB))
 		r.Route("/review", func(r chi.Router) {
 			r.Get("/", review.Page(DB))
 			r.Get("/next", review.GetNextCard(DB))
