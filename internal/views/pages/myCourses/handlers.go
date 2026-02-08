@@ -3,7 +3,9 @@ package myCourses
 import (
 	"database/sql"
 	"net/http"
+	"strconv"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/jonahhess/ds/internal/auth"
 	"github.com/jonahhess/ds/internal/types"
 	"github.com/jonahhess/ds/internal/views/layouts"
@@ -14,6 +16,24 @@ func Page(DB *sql.DB) http.HandlerFunc {
 	ctx := r.Context()
 	userID, ok := auth.UserIDFromContext(ctx)
 	if !ok {
+		http.Error(w, "invalid user id", http.StatusBadRequest)
+		return
+	}
+
+	userIDStrFromURL := chi.URLParam(r, "userID")
+	if !ok {
+		http.Error(w, "invalid user id", http.StatusBadRequest)
+		return
+	}
+	
+	userIDFromURL, err := strconv.Atoi(userIDStrFromURL)
+	if err != nil {
+		http.Error(w, "invalid user id", http.StatusBadRequest)
+		return
+	}
+
+	if userID != userIDFromURL {
+		http.Error(w, "invalid user id", http.StatusBadRequest)
 		return
 	}
 	
