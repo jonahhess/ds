@@ -4,11 +4,8 @@ import (
 	"database/sql"
 	"net/http"
 
-	"strconv"
-
-	"github.com/go-chi/chi/v5"
-
 	"github.com/jonahhess/ds/internal/auth"
+	"github.com/jonahhess/ds/internal/params"
 	"github.com/jonahhess/ds/internal/types"
 	"github.com/jonahhess/ds/internal/views/layouts"
 )
@@ -21,34 +18,10 @@ func Page(DB *sql.DB) http.HandlerFunc {
 		return
 	}
 
-	userIDStrFromURL := chi.URLParam(r, "userID")
+	courseID, ok := params.IntFrom(ctx, "courseID")
 	if !ok {
-		http.Error(w, "invalid user id", http.StatusBadRequest)
-		return
+		 return;
 	}
-	
-	userIDFromURL, err := strconv.Atoi(userIDStrFromURL)
-	if err != nil {
-		http.Error(w, "invalid user id", http.StatusBadRequest)
-		return
-	}
-
-	if userID != userIDFromURL {
-		http.Error(w, "invalid user id", http.StatusBadRequest)
-		return
-	}
-	
-	courseIDStr := chi.URLParam(r, "courseID")
-    if !ok {
-        http.Error(w, "course id missing from context", http.StatusBadRequest)
-        return
-    }
-
-	courseID, err := strconv.Atoi(courseIDStr)
-        if err != nil {
-            http.Error(w, "invalid course id", http.StatusBadRequest)
-            return
-        }
 
 	myCourseData, err := GetMyCourseData(DB, userID, courseID)
 	if err != nil {
