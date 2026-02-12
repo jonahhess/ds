@@ -68,7 +68,6 @@ func GetMyLessonData(DB *sql.DB, userID int, courseID int, lessonIndex int) (*ty
     if err0 != nil {
         return nil, err0
     }
-
         
     var quiz_id int
     err := DB.QueryRow(`SELECT id FROM quizzes WHERE lesson_id = ?`, lesson_id).
