@@ -68,13 +68,6 @@ func Page(DB *sql.DB) http.HandlerFunc {
     var data types.MyCourseData
 
     err := DB.QueryRow(`
-		WITH ordered_lessons AS (
-			SELECT
-				l.course_id,
-				l.title,
-				ROW_NUMBER() OVER (PARTITION BY l.course_id ORDER BY l.id ASC) - 1 AS lesson_index
-			FROM lessons l
-		)
 		SELECT
 			uc.user_id,
 			uc.course_id,
@@ -83,18 +76,18 @@ func Page(DB *sql.DB) http.HandlerFunc {
 			u.name,
 			u.created_at,
 			uc.current_lesson,
-			COALESCE(ol.title, '') AS current_lesson_name,
+			COALESCE(l.title, '') AS current_lesson_name,
 			(
 				SELECT COUNT(*)
-				FROM lessons l
-				WHERE l.course_id = uc.course_id
+				FROM lessons
+				WHERE course_id = uc.course_id
 			) AS total_lessons
 		FROM user_courses AS uc
 		JOIN courses AS c ON c.id = uc.course_id
 		JOIN users AS u ON u.id = c.created_by
-		LEFT JOIN ordered_lessons ol
-			ON ol.course_id = uc.course_id
-			AND ol.lesson_index = uc.current_lesson
+		LEFT JOIN lessons l
+			ON l.course_id = uc.course_id
+			AND l.lesson_index = uc.current_lesson
 		WHERE uc.user_id = ?
 		AND uc.course_id = ?
     `, userID, courseID).Scan(
@@ -111,11 +104,10 @@ func Page(DB *sql.DB) http.HandlerFunc {
 
     if err != nil {
         if err == sql.ErrNoRows {
-            return nil, err // or a custom "not found" error
+            return nil, err
         }
         return nil, err
     }
 
     return &data, nil
 }
-
