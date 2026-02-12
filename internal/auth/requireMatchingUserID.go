@@ -16,8 +16,7 @@ const (
 )
 
 
-func RequireMatchingUserID() func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
+func RequireMatchingUserID(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
 
@@ -42,5 +41,4 @@ func RequireMatchingUserID() func(http.Handler) http.Handler {
 			ctx = context.WithValue(ctx, ctxUserIDFromURL, userIDFromURL)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
-	}
 }
