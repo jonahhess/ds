@@ -2,6 +2,7 @@ package myCourse
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 
 	"github.com/jonahhess/ds/internal/auth"
@@ -83,4 +84,26 @@ func Page(DB *sql.DB) http.HandlerFunc {
     }
 
     return &data, nil
+}
+
+func Remove(DB *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		userID, ok := auth.UserIDFromContext(ctx)
+		if !ok {
+			return
+		}
+
+		courseID, ok := params.IntFrom(ctx, "courseID")
+		if !ok {
+				return;
+		}
+		_, err := DB.Exec("DELETE FROM user_courses WHERE user_id = ? AND course_id = ?", userID, courseID)
+
+		if err != nil {
+			http.Error(w, "failed to delete", http.StatusNotModified)
+		}
+
+		http.Redirect(w,r,fmt.Sprintf("/users/%d/courses",userID), http.StatusSeeOther)
+	}
 }
