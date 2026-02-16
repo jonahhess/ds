@@ -10,6 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"context"
+	"github.com/jonahhess/ds/internal/auth"
 	"github.com/jonahhess/ds/internal/views/components/navbar"
 )
 
@@ -48,7 +49,7 @@ func Base(page string, content templ.Component) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(page)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/layouts/base.templ`, Line: 19, Col: 16}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/layouts/base.templ`, Line: 20, Col: 16}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -58,7 +59,7 @@ func Base(page string, content templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = navbar.Navbar().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = navbar.Navbar(auth.CSRFTokenFromContext(ctx)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

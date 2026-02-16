@@ -2,6 +2,7 @@ package layouts
 
 import (
 	"context"
+	"github.com/jonahhess/ds/internal/auth"
 	"github.com/jonahhess/ds/internal/views/components/navbar"
 )
 
@@ -22,7 +23,7 @@ templ Base(page string, content templ.Component) {
 			<script defer type="module" src="/static/datastar.js"></script>
 		</head>
 		<body>
-			@navbar.Navbar()
+			@navbar.Navbar(auth.CSRFTokenFromContext(ctx))
 			@content
 		</body>
 	</html>
