@@ -2,174 +2,445 @@ package review
 
 import (
 	"database/sql"
-	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
+	"github.com/jonahhess/ds/internal/auth"
+	"github.com/jonahhess/ds/internal/errors"
+	"github.com/jonahhess/ds/internal/params"
 	"github.com/jonahhess/ds/internal/types"
-	reviewcard "github.com/jonahhess/ds/internal/views/components/reviewCard"
 	"github.com/jonahhess/ds/internal/views/layouts"
 )
 
-type ReviewCard struct {
-    ID       int       `json:"card_id"`
-    Text     string    `json:"text"`
-    ReviewAt time.Time `json:"-"`
-    // SM2 fields
-    Repetition int     `json:"-"`
-    Interval   int     `json:"-"`
-    EaseFactor float64 `json:"-"`
-    Answers []types.Answer
-}
-
+// Page - GET /review - Main review page with stats
 func Page(DB *sql.DB) http.HandlerFunc {
- return func(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-    answers := []types.Answer{
-        {ID: 1, Text: "Baby don't hurt me"},
-        {ID: 2, Text: "I want you to show me"},
-    }
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		userID, ok := auth.UserIDFromContext(ctx)
+		if !ok {
+			errors.HandleUnauthorized(w, r)
+			return
+		}
 
-	layouts.Base("Review", reviewcard.ReviewCard(2,"What is love?", answers)).Render(ctx, w)
- }
+		stats, err := GetReviewStats(DB, userID)
+		if err != nil {
+			errors.HandleInternalError(w, r, err)
+			return
+		}
+
+		if err := layouts.
+			Base("Review", Review(*stats)).
+			Render(ctx, w); err != nil {
+			errors.HandleInternalError(w, r, err)
+		}
+	}
 }
 
-// GET /review/next
-func GetNextCard(DB *sql.DB) http.HandlerFunc {
-return func (w http.ResponseWriter, r *http.Request) {
-    card, err := fetchNextCard(DB)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
+// NextCard - GET /review/next - Get next card due for review
+func NextCard(DB *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		userID, ok := auth.UserIDFromContext(ctx)
+		if !ok {
+			errors.HandleUnauthorized(w, r)
+			return
+		}
 
-    if card == nil {
-        json.NewEncoder(w).Encode(map[string]interface{}{
-            "message": "No cards due for review",
-            "card_id": nil,
-        })
-        return
-    }
+		card, err := fetchNextCard(DB, userID)
+		if err != nil {
+			errors.HandleInternalError(w, r, err)
+			return
+		}
 
-    json.NewEncoder(w).Encode(card)
-    }
+		if card == nil {
+			// No cards due, redirect to complete page
+			http.Redirect(w, r, "/review/complete", http.StatusSeeOther)
+			return
+		}
+
+		if err := layouts.
+			Base("Review Card", ReviewCardQuestion(*card)).
+			Render(ctx, w); err != nil {
+			errors.HandleInternalError(w, r, err)
+		}
+	}
 }
 
-// POST /review/submit
-func SubmitAnswer(DB *sql.DB) http.HandlerFunc {
-return func (w http.ResponseWriter, r *http.Request) {
-    var input struct {
-        CardID  int `json:"card_id"`
-        Quality int `json:"quality"` // 0-5
-    }
-    if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-        http.Error(w, "Invalid JSON", http.StatusBadRequest)
-        return
-    }
+// ShowAnswer - GET /review/card/{cardID}/answer - Show answer side of card
+func ShowAnswer(DB *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		userID, ok := auth.UserIDFromContext(ctx)
+		if !ok {
+			errors.HandleUnauthorized(w, r)
+			return
+		}
 
-    // Fetch the card from DB
-    card, err := fetchCarDByID(DB, input.CardID)
-    if err != nil {
-        http.Error(w, "Card not found", http.StatusNotFound)
-        return
-    }
+		cardID, ok := params.IntFrom(ctx, "cardID")
+		if !ok {
+			errors.HandleBadRequest(w, r, "card id not found")
+			return
+		}
 
-    // Apply SM2 algorithm (stub)
-    card.ReviewAt, card.Repetition, card.Interval, card.EaseFactor = applySM2(card, input.Quality)
+		card, correctAnswer, err := fetchCardByID(DB, userID, cardID)
+		if err != nil {
+			errors.HandleInternalError(w, r, err)
+			return
+		}
+		if card == nil {
+			errors.HandleNotFound(w, r, "Card")
+			return
+		}
 
-    // Update DB
-    if err := updateCardReview(DB, card); err != nil {
-        http.Error(w, "Failed to update card", http.StatusInternalServerError)
-        return
-    }
-
-    // Fetch next card
-    nextCard, err := fetchNextCard(DB)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
-
-    if nextCard == nil {
-        json.NewEncoder(w).Encode(map[string]interface{}{
-            "message": "Session complete",
-            "card_id": nil,
-        })
-        return
-    }
-
-    json.NewEncoder(w).Encode(nextCard)
-}}
-
-// --- DB Helpers ---
-
-func fetchNextCard(DB *sql.DB) (*ReviewCard, error) {
-    q := ReviewCard{}
-row := DB.QueryRow(`
-    SELECT id, text, review_at, repetition, interval, ease_factor
-    FROM question
-    WHERE review_at <= CURRENT_TIMESTAMP
-    ORDER BY review_at
-    LIMIT 1
-`)
-err := row.Scan(&q.ID, &q.Text, &q.ReviewAt, &q.Repetition, &q.Interval, &q.EaseFactor)
-if err == sql.ErrNoRows {
-    return nil, nil
+		csrfToken := auth.CSRFToken(r)
+		if err := layouts.
+			Base("Review Card Answer", ReviewCardAnswer(*card, correctAnswer, csrfToken)).
+			Render(ctx, w); err != nil {
+			errors.HandleInternalError(w, r, err)
+		}
+	}
 }
 
-// fetch answers
-rows, err := DB.Query(`SELECT id, text FROM answers WHERE question_id = ?`, q.ID)
-if err != nil {
-    return nil, err
+// RateCard - POST /review/card/{cardID}/rate - Rate card quality and update SM2
+func RateCard(DB *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		userID, ok := auth.UserIDFromContext(ctx)
+		if !ok {
+			errors.HandleUnauthorized(w, r)
+			return
+		}
+
+		cardID, ok := params.IntFrom(ctx, "cardID")
+		if !ok {
+			errors.HandleBadRequest(w, r, "card id not found")
+			return
+		}
+
+		if err := r.ParseForm(); err != nil {
+			errors.HandleBadRequest(w, r, "Error parsing form")
+			return
+		}
+
+		qualityStr := r.FormValue("quality")
+		if qualityStr == "" {
+			errors.HandleBadRequest(w, r, "quality rating required")
+			return
+		}
+
+		var quality int
+		if _, err := fmt.Sscanf(qualityStr, "%d", &quality); err != nil || quality < 0 || quality > 5 {
+			errors.HandleBadRequest(w, r, "quality must be 0-5")
+			return
+		}
+
+		// Fetch card
+		card, correctAnswer, err := fetchCardByID(DB, userID, cardID)
+		if err != nil || card == nil || correctAnswer == "" {
+			errors.HandleInternalError(w, r, err)
+			return
+		}
+
+		// Apply SM2 algorithm
+		newReviewAt, newRepetitions, newInterval, newEasiness := applySM2(card, quality)
+
+		// Update card in database
+		if err := updateCardReview(DB, userID, cardID, newReviewAt, newRepetitions, newInterval, newEasiness, quality); err != nil {
+			errors.HandleInternalError(w, r, err)
+			return
+		}
+
+		// Redirect to next card
+		http.Redirect(w, r, "/review/next", http.StatusSeeOther)
+	}
 }
-defer rows.Close()
 
-for rows.Next() {
-    var a types.Answer
-    if err := rows.Scan(&a.ID, &a.Text); err != nil {
-        return nil, err
-    }
-    q.Answers = append(q.Answers, a)
-}
-    return &q, nil
-}
+// Complete - GET /review/complete - Show completion page
+func Complete(DB *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		userID, ok := auth.UserIDFromContext(ctx)
+		if !ok {
+			errors.HandleUnauthorized(w, r)
+			return
+		}
 
-func fetchCarDByID(DB *sql.DB, id int) (*ReviewCard, error) {
-    row := DB.QueryRow(`SELECT id, text, review_at, repetition, interval, ease_factor FROM question WHERE id=$1`, id)
-    var q ReviewCard
-    err := row.Scan(&q.ID, &q.Text, &q.ReviewAt, &q.Repetition, &q.Interval, &q.EaseFactor)
-    if err == sql.ErrNoRows {
-        return nil, nil
-    }
-    return &q, err
-}
+		stats, err := GetReviewStats(DB, userID)
+		if err != nil {
+			errors.HandleInternalError(w, r, err)
+			return
+		}
 
-func updateCardReview(DB *sql.DB, q *ReviewCard) error {
-    _, err := DB.Exec(`UPDATE question SET review_at=$1, repetition=$2, interval=$3, ease_factor=$4 WHERE id=$5`,
-        q.ReviewAt, q.Repetition, q.Interval, q.EaseFactor, q.ID)
-    return err
+		if err := layouts.
+			Base("Review Complete", ReviewComplete(*stats)).
+			Render(ctx, w); err != nil {
+			errors.HandleInternalError(w, r, err)
+		}
+	}
 }
 
-// --- SM2 Algorithm Stub ---
-func applySM2(card *ReviewCard, quality int) (reviewAt time.Time, repetition int, interval int, easeFactor float64) {
-    // Simplified SM2 algorithm logic
-    easeFactor = card.EaseFactor
-    repetition = card.Repetition
-    interval = card.Interval
+// --- Database Helpers ---
 
-    if quality < 3 {
-        repetition = 0
-        interval = 1
-    } else {
-        repetition++
-        easeFactor = max(1.3, easeFactor + 0.1 - float64(5-quality)*(0.08+float64(5-quality)*0.02))
-        switch repetition {
-        case 1: interval = 1
-        case 2: interval = 6
-        default: interval = int(float64(interval) * easeFactor)
-        }
-    }
+func GetReviewStats(DB *sql.DB, userID int) (*types.ReviewStats, error) {
+	var stats types.ReviewStats
 
-    reviewAt = time.Now().Add(time.Duration(interval) * 24 * time.Hour)
-    return reviewAt, repetition, interval, easeFactor
+	// Total cards
+	err := DB.QueryRow(`
+		SELECT COUNT(*) 
+		FROM reviewcards 
+		WHERE user_id = ?
+	`, userID).Scan(&stats.TotalCards)
+	if err != nil {
+		return nil, err
+	}
+
+	// Cards due today
+	err = DB.QueryRow(`
+		SELECT COUNT(*) 
+		FROM reviewcards 
+		WHERE user_id = ? AND review_at <= CURRENT_TIMESTAMP
+	`, userID).Scan(&stats.CardsDueToday)
+	if err != nil {
+		return nil, err
+	}
+
+	// Cards due in next 7 days
+	err = DB.QueryRow(`
+		SELECT COUNT(*) 
+		FROM reviewcards 
+		WHERE user_id = ? AND review_at <= datetime('now', '+7 days')
+	`, userID).Scan(&stats.CardsDueSoon)
+	if err != nil {
+		return nil, err
+	}
+
+	// Total reviews
+	err = DB.QueryRow(`
+		SELECT COALESCE(SUM(reviews), 0)
+		FROM reviewcards 
+		WHERE user_id = ?
+	`, userID).Scan(&stats.TotalReviews)
+	if err != nil {
+		return nil, err
+	}
+
+	// Success rate
+	var totalSuccesses, totalReviews int
+	err = DB.QueryRow(`
+		SELECT 
+			COALESCE(SUM(successes), 0),
+			COALESCE(SUM(reviews), 0)
+		FROM reviewcards 
+		WHERE user_id = ?
+	`, userID).Scan(&totalSuccesses, &totalReviews)
+	if err != nil {
+		return nil, err
+	}
+
+	if totalReviews > 0 {
+		stats.SuccessRate = float64(totalSuccesses) / float64(totalReviews) * 100
+	}
+
+	return &stats, nil
+}
+
+func fetchNextCard(DB *sql.DB, userID int) (*types.ReviewCard, error) {
+	var card types.ReviewCard
+	var questionID int
+
+	row := DB.QueryRow(`
+		SELECT 
+			rc.id,
+			rc.question_id,
+			q.text,
+			rc.review_at,
+			rc.repetitions,
+			rc.interval,
+			rc.easiness,
+			rc.successes,
+			rc.reviews,
+			rc.created_at
+		FROM reviewcards rc
+		JOIN questions q ON q.id = rc.question_id
+		WHERE rc.user_id = ? AND rc.review_at <= CURRENT_TIMESTAMP
+		ORDER BY rc.review_at ASC
+		LIMIT 1
+	`, userID)
+
+	err := row.Scan(
+		&card.ID,
+		&questionID,
+		&card.QuestionText,
+		&card.ReviewAt,
+		&card.Repetitions,
+		&card.Interval,
+		&card.Easiness,
+		&card.Successes,
+		&card.Reviews,
+		&card.CreatedAt,
+	)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	card.UserID = userID
+	card.QuestionID = questionID
+
+	// Fetch answers for this question
+	rows, err := DB.Query(`
+		SELECT id, text 
+		FROM answers 
+		WHERE question_id = ?
+		ORDER BY id
+	`, questionID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var answer types.Answer
+		if err := rows.Scan(&answer.ID, &answer.Text); err != nil {
+			return nil, err
+		}
+		answer.QuestionID = questionID
+		card.Answers = append(card.Answers, answer)
+	}
+
+	return &card, nil
+}
+
+func fetchCardByID(DB *sql.DB, userID int, cardID int) (*types.ReviewCard, string, error) {
+	var card types.ReviewCard
+	var questionID int
+
+	row := DB.QueryRow(`
+		SELECT 
+			rc.id,
+			rc.question_id,
+			q.text,
+			rc.review_at,
+			rc.repetitions,
+			rc.interval,
+			rc.easiness,
+			rc.successes,
+			rc.reviews,
+			rc.created_at
+		FROM reviewcards rc
+		JOIN questions q ON q.id = rc.question_id
+		WHERE rc.id = ? AND rc.user_id = ?
+	`, cardID, userID)
+
+	err := row.Scan(
+		&card.ID,
+		&questionID,
+		&card.QuestionText,
+		&card.ReviewAt,
+		&card.Repetitions,
+		&card.Interval,
+		&card.Easiness,
+		&card.Successes,
+		&card.Reviews,
+		&card.CreatedAt,
+	)
+	if err == sql.ErrNoRows {
+		return nil, "", nil
+	}
+	if err != nil {
+		return nil, "", err
+	}
+
+	card.UserID = userID
+	card.QuestionID = questionID
+
+	// Fetch answers
+	rows, err := DB.Query(`
+		SELECT id, text 
+		FROM answers 
+		WHERE question_id = ?
+		ORDER BY id
+	`, questionID)
+	if err != nil {
+		return nil, "", err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var answer types.Answer
+		if err := rows.Scan(&answer.ID, &answer.Text); err != nil {
+			return nil, "", err
+		}
+		answer.QuestionID = questionID
+		card.Answers = append(card.Answers, answer)
+	}
+
+	var correctAnswer string
+	err = DB.QueryRow(`
+		SELECT a.text 
+		FROM correct_answers ca
+		JOIN answers a ON a.id = ca.answer_id
+		WHERE ca.question_id = ?
+	`, questionID).Scan(&correctAnswer)
+	if err != nil {
+		return nil, "", err
+	}
+
+	return &card, correctAnswer, nil
+}
+
+func updateCardReview(DB *sql.DB, userID int, cardID int, reviewAt time.Time, repetitions int, interval int, easiness float64, quality int) error {
+	// Update SM2 fields and increment counters
+	_, err := DB.Exec(`
+		UPDATE reviewcards 
+		SET 
+			review_at = ?,
+			repetitions = ?,
+			interval = ?,
+			easiness = ?,
+			reviews = reviews + 1,
+			successes = successes + ?
+		WHERE id = ? AND user_id = ?
+	`, reviewAt, repetitions, interval, easiness, 
+		// If quality >= 3, count as success (1), otherwise 0
+		map[bool]int{true: 1, false: 0}[quality >= 3],
+		cardID, userID)
+	return err
+}
+
+// --- SM2 Algorithm ---
+func applySM2(card *types.ReviewCard, quality int) (reviewAt time.Time, repetitions int, interval int, easiness float64) {
+	easiness = card.Easiness
+	repetitions = card.Repetitions
+	interval = card.Interval
+
+	if quality < 3 {
+		// Failed - reset
+		repetitions = 0
+		interval = 1
+	} else {
+		// Passed
+		repetitions++
+		// Update easiness factor
+		easiness = easiness + (0.1 - float64(5-quality)*(0.08+float64(5-quality)*0.02))
+		if easiness < 1.3 {
+			easiness = 1.3
+		}
+
+		// Calculate interval
+		switch repetitions {
+		case 1:
+			interval = 1
+		case 2:
+			interval = 6
+		default:
+			interval = int(float64(interval) * easiness)
+		}
+	}
+
+	reviewAt = time.Now().Add(time.Duration(interval) * 24 * time.Hour)
+	return reviewAt, repetitions, interval, easiness
 }
