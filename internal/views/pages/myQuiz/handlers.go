@@ -203,7 +203,7 @@ func Submit(DB *sql.DB) http.HandlerFunc {
 				http.Error(w,"cannot update current lesson", http.StatusNotModified)
 			}
 
-			http.Redirect(w, r, fmt.Sprintf("/users/%d/courses/%d/lessons/%d", userID, courseID, lessonIndex + 1), http.StatusSeeOther)
+			http.Redirect(w, r, fmt.Sprintf("/users/%d/courses/%d", userID, courseID), http.StatusSeeOther)
 		} else {		
 			isValid := validQuiz(DB, userID, quizID)
 			if !isValid {
