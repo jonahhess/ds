@@ -24,7 +24,6 @@ func Page(DB *sql.DB) http.HandlerFunc {
 		if !ok {
 			return
 		}
-		fmt.Println("here")
 		
 		lessonIndex, ok := params.IntFrom(ctx, "lessonIndex")
 		if !ok {
@@ -45,10 +44,12 @@ func Page(DB *sql.DB) http.HandlerFunc {
 	myData, err := GetMyQuiz(DB, userID, quizID)
 	if err != nil {
 		 http.Error(w, err.Error(), http.StatusInternalServerError)
+		 return
 	}
 
+	csrfToken := auth.CSRFToken(r)
 	 if err := layouts.
-	 Base("MyQuiz", MyQuiz(userID, courseID, lessonIndex, quizID, myData, []int{})).
+	 Base("MyQuiz", MyQuiz(userID, courseID, lessonIndex, quizID, myData, []int{}, csrfToken)).
 	 Render(ctx, w);  err != nil {
 		 http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
@@ -170,21 +171,23 @@ func Submit(DB *sql.DB) http.HandlerFunc {
 		// main loop
 		score := 0
 		total := 0
-
 		var mistakes []int
 
 		for key, values := range r.PostForm {
-			total += 1
 			intKey, err :=  strconv.Atoi(key)
 			if err != nil {
-				http.Error(w, "form key not integer", http.StatusMethodNotAllowed)
+				continue
 			}
+			
+			total++
+			
 			for _, value := range values {
+				var exists int
 				if err := DB.QueryRow(`
 				SELECT 1 
 				FROM correct_answers 
 				WHERE question_id = ? AND answer_id = ?`, key, value).
-				Scan(new(int)); err == nil {
+				Scan(&exists); err == nil {
 					score += 1
 				} else {
 					mistakes = append(mistakes, intKey)
@@ -193,17 +196,69 @@ func Submit(DB *sql.DB) http.HandlerFunc {
 		}
 		// end of main loop
 
+		if total == 0 {
+			http.Error(w, "no questions in quiz", http.StatusInternalServerError)
+			return
+		}
+
 		if float32(score) / float32(total) >= 0.8 {
-			_, err := DB.Exec(`
-				UPDATE user_courses 
-				SET current_lesson = current_lesson + 1 
-				WHERE user_id = ? AND course_id = ?`, userID, courseID)
-
-			if err != nil {
-				http.Error(w,"cannot update current lesson", http.StatusNotModified)
+			
+			// Create review cards for each question in the quiz
+			questionIDs := make([]int, 0, len(r.PostForm))
+			for key := range r.PostForm {
+				questionID, err := strconv.Atoi(key)
+				if err != nil {
+					continue // Skip invalid keys
+				}
+				questionIDs = append(questionIDs, questionID)
 			}
-
+			
+			if len(questionIDs) == 0 {
+				http.Error(w, "no questions in quiz", http.StatusInternalServerError)
+				return
+			}
+		
+			// Use a transaction for atomicity
+			tx, err := DB.Begin()
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			defer tx.Rollback()
+		
+			stmt, err := tx.Prepare(`
+				INSERT OR IGNORE INTO reviewcards 
+				(user_id, question_id, review_at, interval, easiness, repetitions, successes, reviews)
+				VALUES (?, ?, CURRENT_TIMESTAMP, 1, 2.5, 0, 0, 0)
+			`)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			defer stmt.Close()
+		
+			for _, questionID := range questionIDs {
+				_, err := stmt.Exec(userID, questionID)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+			}
+			
+			if _, err := tx.Exec(`
+			UPDATE user_courses 
+			SET current_lesson = current_lesson + 1 
+			WHERE user_id = ? AND course_id = ?`, userID, courseID); err != nil {
+				http.Error(w, "cannot update current lesson", http.StatusInternalServerError)
+				return
+			}
+			
+			if err := tx.Commit(); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 			http.Redirect(w, r, fmt.Sprintf("/users/%d/courses/%d", userID, courseID), http.StatusSeeOther)
+			return
 		} else {		
 			isValid := validQuiz(DB, userID, quizID)
 			if !isValid {
@@ -214,13 +269,15 @@ func Submit(DB *sql.DB) http.HandlerFunc {
 			myData, err := GetMyQuiz(DB, userID, quizID)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
 			}
 					
+			csrfToken := auth.CSRFToken(r)
 			if err := layouts.
-				Base("MyQuiz", MyQuiz(userID, courseID, lessonIndex, quizID, myData, mistakes)).
+				Base("MyQuiz", MyQuiz(userID, courseID, lessonIndex, quizID, myData, mistakes, csrfToken)).
 				Render(ctx, w);  err != nil {
 		 			http.Error(w, err.Error(), http.StatusInternalServerError)
 				}
 			}
-		}
 	}
+}
