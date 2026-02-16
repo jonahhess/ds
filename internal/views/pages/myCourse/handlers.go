@@ -30,8 +30,9 @@ func Page(DB *sql.DB) http.HandlerFunc {
 		 return;
 	}
 
+	csrfToken := auth.CSRFToken(r)
 	 if err := layouts.
-	 Base("MyCourse", MyCourse(userID, *myCourseData)).
+	 Base("MyCourse", MyCourse(userID, *myCourseData, csrfToken)).
 	 Render(r.Context(), w);  err != nil {
 		 http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
@@ -88,22 +89,30 @@ func Page(DB *sql.DB) http.HandlerFunc {
 
 func Remove(DB *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
 		ctx := r.Context()
 		userID, ok := auth.UserIDFromContext(ctx)
 		if !ok {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 
 		courseID, ok := params.IntFrom(ctx, "courseID")
 		if !ok {
-				return;
+			http.Error(w, "Bad request", http.StatusBadRequest)
+			return
 		}
+
 		_, err := DB.Exec("DELETE FROM user_courses WHERE user_id = ? AND course_id = ?", userID, courseID)
-
 		if err != nil {
-			http.Error(w, "failed to delete", http.StatusNotModified)
+			http.Error(w, "Failed to delete", http.StatusInternalServerError)
+			return
 		}
 
-		http.Redirect(w,r,fmt.Sprintf("/users/%d/courses",userID), http.StatusSeeOther)
+		http.Redirect(w, r, fmt.Sprintf("/users/%d/courses", userID), http.StatusSeeOther)
 	}
 }
