@@ -1,28 +1,16 @@
 package lesson
 
-import "github.com/jonahhess/ds/internal/types"
-import "fmt"
+import (
+	"fmt"
+	"github.com/jonahhess/ds/internal/types"
+)
 
 templ Lesson(userID int, courseID int, lessonIndex int, lesson types.Lesson) {
 	<h2>Title: { lesson.Title }</h2>
 	<p>Text: { lesson.Text }</p>
-	<form method="post" action={ fmt.Sprintf("/users/%d/courses/%d/lessons/%d", userID, courseID, lessonIndex) }>
-		Quiz:
-		<ol>
-			for i, v := range lesson.Quiz.Questions {
-				<li>
-					<p>{ v.Text }</p>
-					<label for={ fmt.Sprintf("question%d", i) }>Choose an answer</label>
-					<select name={ fmt.Sprintf("question%d", i) } id={ fmt.Sprintf("question%d", i) }>
-						for _,q := range v.Answers {
-							<option value={ q.ID }>{ q.Text }</option>
-						}
-					</select>
-				</li>
-			}
-		</ol>
-		<br/>
-		<input type="submit" value="Submit"/>
-	</form>
-	<a href={ fmt.Sprintf("/users/%d/courses/%d/lessons/%d/submit", userID, courseID, lessonIndex) }>Go to Course</a>
+	if lesson.QuizID != 0 {
+		<a href={ fmt.Sprintf("/users/%d/quizzes/%d", userID, lesson.QuizID) }>Start Quiz</a>
+	} else {
+		<p>No quiz.</p>
+	}
 }
