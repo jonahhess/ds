@@ -1,0 +1,89 @@
+package review
+
+import (
+	"fmt"
+	"github.com/jonahhess/ds/internal/types"
+	"strconv"
+)
+
+templ ReviewCardQuestion(card types.ReviewCard) {
+	<h1>Review Card</h1>
+	<div id="card-question">
+		<div style="border: 2px solid #333; padding: 20px; margin: 20px 0; border-radius: 8px; min-height: 200px;">
+			<h2>Question</h2>
+			<p style="font-size: 1.2em;">{ card.QuestionText }</p>
+		</div>
+		for _, answer := range card.Answers {
+			<div style="margin-top: 20px;">
+				<a href={ fmt.Sprintf("/review/card/%d/answer", card.QuestionID) } style="display: inline-block; padding: 10px 20px; background-color: #2196F3; color: white; text-decoration: none; border-radius: 5px;">
+					{ answer.Text }
+				</a>
+			</div>
+		}
+		<div style="margin-top: 20px; font-size: 0.9em; color: #666;">
+			<p>Repetitions: { strconv.Itoa(card.Repetitions) }</p>
+			<p>Next review in: { strconv.Itoa(card.Interval) } days</p>
+		</div>
+	</div>
+}
+
+templ ReviewCardAnswer(card types.ReviewCard, correctAnswer string, csrfToken string) {
+	<h1>Review Card</h1>
+	<div id="card-answer">
+		<div style="border: 2px solid #333; padding: 20px; margin: 20px 0; border-radius: 8px; min-height: 200px;">
+			<h2>Question</h2>
+			<p style="font-size: 1.2em;">{ card.QuestionText }</p>
+			<h3 style="margin-top: 30px;">Answer</h3>
+			<p style="font-size: 1.2em;">{ correctAnswer }</p>
+		</div>
+		<div style="margin-top: 30px;">
+			<h3>How well did you know this?</h3>
+			<form method="post" action={ fmt.Sprintf("/review/card/%d/rate", card.ID) }>
+				<input type="hidden" name="csrf_token" value={ csrfToken }/>
+				<div style="display: flex; gap: 10px; flex-wrap: wrap;">
+					<button type="submit" name="quality" value="0" style="padding: 10px 15px; background-color: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">
+						0 - Complete Blackout
+					</button>
+					<button type="submit" name="quality" value="1" style="padding: 10px 15px; background-color: #ff9800; color: white; border: none; border-radius: 5px; cursor: pointer;">
+						1 - Incorrect Response
+					</button>
+					<button type="submit" name="quality" value="2" style="padding: 10px 15px; background-color: #ffc107; color: black; border: none; border-radius: 5px; cursor: pointer;">
+						2 - Incorrect, but remembered
+					</button>
+					<button type="submit" name="quality" value="3" style="padding: 10px 15px; background-color: #8bc34a; color: white; border: none; border-radius: 5px; cursor: pointer;">
+						3 - Correct with difficulty
+					</button>
+					<button type="submit" name="quality" value="4" style="padding: 10px 15px; background-color: #4caf50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+						4 - Correct after hesitation
+					</button>
+					<button type="submit" name="quality" value="5" style="padding: 10px 15px; background-color: #2196f3; color: white; border: none; border-radius: 5px; cursor: pointer;">
+						5 - Perfect response
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+}
+
+templ ReviewComplete(stats types.ReviewStats) {
+	<h1>Review Complete!</h1>
+	<div id="completion-message" style="text-align: center; padding: 40px;">
+		<p style="font-size: 1.5em; margin-bottom: 20px;">Great job! You've completed your review session.</p>
+		<div style="border: 2px solid #4CAF50; padding: 20px; border-radius: 8px; margin: 20px auto; max-width: 400px;">
+			<h2>Your Progress</h2>
+			<p>Total Cards: { strconv.Itoa(stats.TotalCards) }</p>
+			<p>Cards Due: { strconv.Itoa(stats.CardsDueToday) }</p>
+			if stats.TotalReviews > 0 {
+				<p>Success Rate: { fmt.Sprintf("%.1f", stats.SuccessRate) }%</p>
+			}
+		</div>
+		<div style="margin-top: 30px;">
+			<a href="/review" style="display: inline-block; padding: 10px 20px; background-color: #2196F3; color: white; text-decoration: none; border-radius: 5px; margin: 10px;">
+				Back to Review
+			</a>
+			<a href="/" style="display: inline-block; padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; margin: 10px;">
+				Home
+			</a>
+		</div>
+	</div>
+}

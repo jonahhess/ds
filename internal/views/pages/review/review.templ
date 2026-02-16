@@ -1,7 +1,28 @@
 package review
 
-import "database/sql"
+import (
+	"fmt"
+	"github.com/jonahhess/ds/internal/types"
+	"strconv"
+)
 
-templ Review(DB *sql.DB) {
-	<h1>All Review</h1>
+templ Review(stats types.ReviewStats) {
+	<h1>Review</h1>
+	<div id="review-stats">
+		<h2>Statistics</h2>
+		<p>Total Cards: { strconv.Itoa(stats.TotalCards) }</p>
+		<p>Cards Due Today: { strconv.Itoa(stats.CardsDueToday) }</p>
+		<p>Cards Due Soon: { strconv.Itoa(stats.CardsDueSoon) }</p>
+		<p>Total Reviews: { strconv.Itoa(stats.TotalReviews) }</p>
+		if stats.TotalReviews > 0 {
+			<p>Success Rate: { fmt.Sprintf("%.1f", stats.SuccessRate) }%</p>
+		}
+	</div>
+	if stats.CardsDueToday > 0 {
+		<a href="/review/next" style="display: inline-block; padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px;">
+			Start Review ({ strconv.Itoa(stats.CardsDueToday) } cards due)
+		</a>
+	} else {
+		<p>No cards due for review. Great job!</p>
+	}
 }
