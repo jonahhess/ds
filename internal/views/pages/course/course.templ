@@ -3,11 +3,10 @@ package course
 import (
 	"fmt"
 	"github.com/jonahhess/ds/internal/types"
-	"strconv"
 	"strings"
 )
 
-templ Course(userID int, courseID int, data types.CourseData) {
+templ Course(userID int, courseID int, data types.CourseData, csrfToken string) {
 	<h1>{ data.Title }</h1>
 	if (data.Lessons != "") {
 		<ol>
@@ -21,10 +20,10 @@ templ Course(userID int, courseID int, data types.CourseData) {
 	if (data.UserCurrentlyEnrolled) {
 		<a href={ fmt.Sprintf("/users/%d/courses/%d", userID, courseID) }>Go to Course</a>
 	} else {
-		<button data-indicator:fetching data-on:click={ "@post('/courses/" + strconv.Itoa(courseID) + "/enroll')" } data-show="!$fetching">
-			Start Course
-		</button>
-		<p data-show="$fetching" style="display: none">Loading...</p>
+		<form method="post" action={ fmt.Sprintf("/courses/%d/enroll", courseID) }>
+			<input type="hidden" name="csrf_token" value={ csrfToken }/>
+			<button type="submit">Start Course</button>
+		</form>
 	}
 	<a href="/courses">All Courses</a>
 }
