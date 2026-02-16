@@ -3,6 +3,7 @@ package login
 import (
 	"net/http"
 
+	"github.com/jonahhess/ds/internal/auth"
 	"github.com/jonahhess/ds/internal/views/layouts"
 )
 
@@ -14,8 +15,9 @@ func Page(w http.ResponseWriter, r *http.Request) {
 		errMsg = "Invalid Credentials"
 	}
 
+	csrfToken := auth.CSRFToken(r)
 	err := layouts.
-		Base("Login", Login(errMsg)).
+		Base("Login", Login(errMsg, csrfToken)).
 		Render(r.Context(), w)
 
 	if err != nil {
