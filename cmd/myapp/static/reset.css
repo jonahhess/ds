@@ -55,6 +55,11 @@ h6 {
   text-wrap: balance;
 }
 
+a,
+a:visited {
+  color: #0000ee;
+}
+
 #root,
 #__next {
   isolation: isolate;
