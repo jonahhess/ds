@@ -14,7 +14,8 @@ const csrfTokenLength = 32
 func CSRFMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			sess, ok := SessionFromContext(r.Context())
+			ctx := r.Context()
+			sess, ok := SessionFromContext(ctx)
 			if !ok {
 				http.Error(w, "Session not found", http.StatusInternalServerError)
 				return
@@ -32,7 +33,6 @@ func CSRFMiddleware() func(http.Handler) http.Handler {
 			}
 
 			// Store CSRF token in context for template access
-			ctx := r.Context()
 			ctx = context.WithValue(ctx, "csrf_token", token)
 			r = r.WithContext(ctx)
 
