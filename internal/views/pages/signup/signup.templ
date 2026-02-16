@@ -11,10 +11,11 @@ type UserSignup struct {
 	Password string
 }
 
-templ Signup(errMsg string) {
+templ Signup(errMsg string, csrfToken string) {
 	if _, ok := auth.UserIDFromContext(ctx); !ok {
 		<h1>Signup</h1>
 		<form action="/signup" method="post">
+			<input type="hidden" name="csrf_token" value={ csrfToken }/>
 			<label for="name">Name</label>
 			<input id="name" type="text" autocomplete="name" name="name" required/>
 			<label for="email">Email</label>

@@ -19,7 +19,7 @@ type UserSignup struct {
 	Password string
 }
 
-func Signup(errMsg string) templ.Component {
+func Signup(errMsg string, csrfToken string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -41,12 +41,25 @@ func Signup(errMsg string) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		if _, ok := auth.UserIDFromContext(ctx); !ok {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1>Signup</h1><form action=\"/signup\" method=\"post\"><label for=\"name\">Name</label> <input id=\"name\" type=\"text\" autocomplete=\"name\" name=\"name\" required> <label for=\"email\">Email</label> <input type=\"text\" id=\"email\" autocomplete=\"email\" name=\"email\" required> <label for=\"password\">Password</label> <input type=\"text\" id=\"password\" name=\"password\" autocomplete=\"new-password\" required> <button type=\"submit\">Submit</button></form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1>Signup</h1><form action=\"/signup\" method=\"post\"><input type=\"hidden\" name=\"csrf_token\" value=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var2 string
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(csrfToken)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/signup/signup.templ`, Line: 18, Col: 59}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"> <label for=\"name\">Name</label> <input id=\"name\" type=\"text\" autocomplete=\"name\" name=\"name\" required> <label for=\"email\">Email</label> <input type=\"text\" id=\"email\" autocomplete=\"email\" name=\"email\" required> <label for=\"password\">Password</label> <input type=\"text\" id=\"password\" name=\"password\" autocomplete=\"new-password\" required> <button type=\"submit\">Submit</button></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<h1>You are logged in!</h1>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<h1>You are logged in!</h1>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
