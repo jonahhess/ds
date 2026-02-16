@@ -2,7 +2,9 @@ package myQuiz
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/jonahhess/ds/internal/auth"
 	"github.com/jonahhess/ds/internal/params"
@@ -12,17 +14,28 @@ import (
 
 func Page(DB *sql.DB) http.HandlerFunc {
  return func(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	userID, ok := auth.UserIDFromContext(ctx)
-	if !ok {
-		return
-	}
-
-	quizID, ok := params.IntFrom(ctx, "quizID")
-	if !ok {
-		return
-	}
-
+	 ctx := r.Context()
+	 userID, ok := auth.UserIDFromContext(ctx)
+	 if !ok {
+		 return
+		}
+		
+		courseID, ok := params.IntFrom(ctx, "courseID")
+		if !ok {
+			return
+		}
+		fmt.Println("here")
+		
+		lessonIndex, ok := params.IntFrom(ctx, "lessonIndex")
+		if !ok {
+			return
+		}
+		
+		quizID, ok := params.IntFrom(ctx, "quizID")
+		if !ok {
+			return
+		}
+		
     isValid := validQuiz(DB, userID, quizID)
     if !isValid {
         http.Error(w, "invalid quiz", http.StatusInternalServerError)
@@ -35,8 +48,8 @@ func Page(DB *sql.DB) http.HandlerFunc {
 	}
 
 	 if err := layouts.
-	 Base("MyQuiz", MyQuiz(userID, quizID, myData)).
-	 Render(r.Context(), w);  err != nil {
+	 Base("MyQuiz", MyQuiz(userID, courseID, lessonIndex, quizID, myData, []int{})).
+	 Render(ctx, w);  err != nil {
 		 http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	}
@@ -120,4 +133,94 @@ func validQuiz(DB *sql.DB, userID int, quizID int) bool {
     return true
 }
 
-// func Submit()
+func Submit(DB *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
+			http.Error(w, "Only POST method is supported", http.StatusMethodNotAllowed)
+			return
+		}
+
+		ctx := r.Context()
+		userID, ok := auth.UserIDFromContext(ctx)
+		if !ok {
+			return
+		}
+
+		courseID, ok := params.IntFrom(ctx, "courseID")
+		if !ok {
+			return
+		}
+
+		lessonIndex, ok := params.IntFrom(ctx, "lessonIndex")
+		if !ok {
+			return
+		}
+
+		quizID, ok := params.IntFrom(ctx, "quizID")
+		if !ok {
+			return
+		}
+
+		err := r.ParseForm()
+		if err != nil {
+			http.Error(w, "Error parsing form data", http.StatusInternalServerError)
+			return
+		}
+
+		// main loop
+		score := 0
+		total := 0
+
+		var mistakes []int
+
+		for key, values := range r.PostForm {
+			total += 1
+			intKey, err :=  strconv.Atoi(key)
+			if err != nil {
+				http.Error(w, "form key not integer", http.StatusMethodNotAllowed)
+			}
+			for _, value := range values {
+				if err := DB.QueryRow(`
+				SELECT 1 
+				FROM correct_answers 
+				WHERE question_id = ? AND answer_id = ?`, key, value).
+				Scan(new(int)); err == nil {
+					score += 1
+				} else {
+					mistakes = append(mistakes, intKey)
+				}
+			}
+		}
+		// end of main loop
+
+		if float32(score) / float32(total) >= 0.8 {
+			_, err := DB.Exec(`
+				UPDATE user_courses 
+				SET current_lesson = current_lesson + 1 
+				WHERE user_id = ? AND course_id = ?`, userID, courseID)
+
+			if err != nil {
+				http.Error(w,"cannot update current lesson", http.StatusNotModified)
+			}
+
+			http.Redirect(w, r, fmt.Sprintf("/users/%d/courses/%d/lessons/%d", userID, courseID, lessonIndex + 1), http.StatusSeeOther)
+		} else {		
+			isValid := validQuiz(DB, userID, quizID)
+			if !isValid {
+				http.Error(w, "invalid quiz", http.StatusInternalServerError)
+				return
+			}
+
+			myData, err := GetMyQuiz(DB, userID, quizID)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+					
+			if err := layouts.
+				Base("MyQuiz", MyQuiz(userID, courseID, lessonIndex, quizID, myData, mistakes)).
+				Render(ctx, w);  err != nil {
+		 			http.Error(w, err.Error(), http.StatusInternalServerError)
+				}
+			}
+		}
+	}
