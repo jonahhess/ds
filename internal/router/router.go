@@ -72,6 +72,7 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 		r.Use(auth.RequireAuthMiddleware)
 			r.Use(auth.RequireMatchingUserID)
 			r.Route("/courses", func(r chi.Router) {
+				r.Get("/add", myCourses.Add(DB))
 				r.Route("/{courseID}", func(r chi.Router) {
 					r.Use(params.Int("courseID"))
 					r.Route("/lessons/{lessonIndex}", func(r chi.Router) {
