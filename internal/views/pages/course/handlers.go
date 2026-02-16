@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/jonahhess/ds/internal/auth"
+	"github.com/jonahhess/ds/internal/errors"
 	"github.com/jonahhess/ds/internal/params"
 	"github.com/jonahhess/ds/internal/types"
 	"github.com/jonahhess/ds/internal/views/layouts"
@@ -21,20 +22,22 @@ func Page(DB *sql.DB) http.HandlerFunc {
 
 	courseID, ok := params.IntFrom(r.Context(), "courseID")
 		if !ok {
-			http.Error(w, "course id not found", http.StatusInternalServerError)
+			errors.HandleBadRequest(w, r, "course id not found")
 			return
 		}
 
 	myData, err := GetCourseData(DB, userID, courseID)
 	if err != nil {
-		 http.Error(w, "invalid course id", http.StatusInternalServerError)
+		 errors.HandleNotFound(w, r, "Course")
 		 return
 	}
 
+	csrfToken := auth.CSRFToken(r)
 	 if err := layouts.
-	 Base("Course", Course(userID, courseID, *myData)).
+	 Base("Course", Course(userID, courseID, *myData, csrfToken)).
 	 Render(r.Context(), w);  err != nil {
-		 http.Error(w, err.Error(), http.StatusInternalServerError)
+		 errors.HandleInternalError(w, r, err)
+		 return
 		}
 	}
 }
@@ -84,30 +87,33 @@ func Enroll(DB *sql.DB) http.HandlerFunc {
 		ctx := r.Context()
 		userID, ok := auth.UserIDFromContext(ctx)
 		if !ok {
-				http.Error(w, "invalid user id", http.StatusInternalServerError)
+				errors.HandleUnauthorized(w, r)
 				return
 			}
 			
 		courseID, ok := params.IntFrom(ctx, "courseID")
 		if !ok {
-			http.Error(w, "course id not found", http.StatusInternalServerError)
+			errors.HandleBadRequest(w, r, "course id not found")
 			return
 		}
 
 		if _, err := DB.Exec("INSERT INTO user_courses (user_id, course_id, current_lesson) VALUES (?, ?, 0)", userID, courseID); err != nil {
-			http.Error(w, "Enroll error: ", http.StatusConflict)
+			errors.HandleError(w, r, err, http.StatusConflict, "Already enrolled in this course")
 			return
 		}
 
 		myData, err := GetCourseData(DB, userID, courseID)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			errors.HandleInternalError(w, r, err)
+			return
 		}
 
+		csrfToken := auth.CSRFToken(r)
 		if err := layouts.
-		Base("Course", Course(userID, courseID, *myData)).
+		Base("Course", Course(userID, courseID, *myData, csrfToken)).
 		Render(r.Context(), w);  err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			errors.HandleInternalError(w, r, err)
+			return
 		}
 	}
 }
