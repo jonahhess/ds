@@ -14,4 +14,5 @@ templ MyCourses(userID int, courses []types.Item) {
 			</li>
 		}
 	</ul>
+	<a href={ fmt.Sprintf("/users/%d/courses/add", userID) }>Enroll in a new course</a>
 }
