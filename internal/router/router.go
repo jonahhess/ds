@@ -12,6 +12,7 @@ import (
 	"github.com/jonahhess/ds/internal/views/pages/courses"
 	home "github.com/jonahhess/ds/internal/views/pages/home"
 	"github.com/jonahhess/ds/internal/views/pages/login"
+	"github.com/jonahhess/ds/internal/views/pages/myAvailableCourses"
 	"github.com/jonahhess/ds/internal/views/pages/myCourse"
 	"github.com/jonahhess/ds/internal/views/pages/myCourses"
 	"github.com/jonahhess/ds/internal/views/pages/myLesson"
@@ -72,9 +73,11 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 		r.Use(auth.RequireAuthMiddleware)
 			r.Use(auth.RequireMatchingUserID)
 			r.Route("/courses", func(r chi.Router) {
-				r.Get("/add", myCourses.Add(DB))
+				r.Get("/add", myAvailableCourses.Page(DB))
 				r.Route("/{courseID}", func(r chi.Router) {
 					r.Use(params.Int("courseID"))
+					r.Get("/", myCourse.Page(DB))
+					r.Get("/remove", myCourse.Remove(DB))
 					r.Route("/lessons/{lessonIndex}", func(r chi.Router) {
 						r.Use(params.Int("lessonIndex"))
 						r.Route("/quizzes/{quizID}", func(r chi.Router) {
@@ -84,7 +87,6 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 						})
 						r.Get("/", myLesson.Page(DB))
 						})	
-					r.Get("/", myCourse.Page(DB))
 				})
 				r.Get("/", myCourses.Page(DB))
 			})
