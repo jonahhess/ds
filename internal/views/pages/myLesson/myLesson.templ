@@ -1,0 +1,18 @@
+package myLesson
+
+import (
+	"fmt"
+	"github.com/jonahhess/ds/internal/types"
+)
+
+templ MyLesson(userID int, courseID int, lessonIndex int, lesson types.Lesson) {
+	<h2>Title: { lesson.Title }</h2>
+	if lesson.Text == "" {
+		<a href={ fmt.Sprintf("/users/%d/courses/%d/lessons/%d/generate", userID, courseID, lessonIndex) }>Generate Lesson</a>
+	} else {
+		<p>Text: { lesson.Text }</p>
+		if lesson.QuizID != 0 {
+			<a href={ fmt.Sprintf("/users/%d/courses/%d/lessons/%d/quizzes/%d", userID, courseID, lessonIndex, lesson.QuizID) }>Start Quiz</a>
+		}
+	}
+}
