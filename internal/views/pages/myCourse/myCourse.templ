@@ -12,7 +12,9 @@ templ MyCourse(userID int, courseData types.MyCourseData) {
 		<p>Current Lesson: { courseData.CurrentLessonName }</p>
 		<p>Progess: { strconv.Itoa(courseData.CurrentLesson) } / { strconv.Itoa(courseData.TotalLessons) }</p>
 	</div>
-	<a href={ fmt.Sprintf("/users/%d/courses/%d/lessons/%d", userID, courseData.CourseID, courseData.CurrentLesson+1) }>Start Course</a>
+	if strconv.Itoa(courseData.CurrentLesson) < strconv.Itoa(courseData.TotalLessons) {
+		<a href={ fmt.Sprintf("/users/%d/courses/%d/lessons/%d", userID, courseData.CourseID, courseData.CurrentLesson+1) }>Start Course</a>
+	}
 	<a href={ fmt.Sprintf("/courses/%d", courseData.CourseID) }>Course Page</a>
 	<a href={ fmt.Sprintf("/users/%d/courses", userID) }>My Courses</a>
 }
