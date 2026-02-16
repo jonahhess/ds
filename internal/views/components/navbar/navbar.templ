@@ -2,7 +2,7 @@ package navbar
 
 import "github.com/jonahhess/ds/internal/auth"
 
-templ Navbar() {
+templ Navbar(csrfToken string) {
 	<header class="navbar">
 		if _, ok := auth.UserIDFromContext(ctx); !ok {
 			<a href="/">Home</a>
@@ -13,6 +13,7 @@ templ Navbar() {
 			<a href="/study">Study</a>
 			<a href="/review">Review</a>
 			<form class="navbar-element" method="POST" action="/logout">
+				<input type="hidden" name="csrf_token" value={ csrfToken }/>
 				<button type="submit" class="logout-button">Log Out</button>
 			</form>
 		}
