@@ -45,10 +45,10 @@ func Page(DB *sql.DB) http.HandlerFunc {
             return
         }
 		
-		// Get the user's course data
+		// Get the user's lesson data
 		myData, err := GetMyLessonData(DB, userID, courseID, lessonIndex)
 		if err != nil {
-			http.Error(w, "course not found", http.StatusNotFound)
+			http.Error(w, "lesson not found", http.StatusNotFound)
 			return
 		}
 		
