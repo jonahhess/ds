@@ -13,7 +13,7 @@ import (
 	"github.com/jonahhess/ds/internal/views/components/toast"
 )
 
-func Login(errMsg string) templ.Component {
+func Login(errMsg string, csrfToken string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -35,12 +35,25 @@ func Login(errMsg string) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		if _, ok := auth.UserIDFromContext(ctx); !ok {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1>Login Guest</h1><form action=\"/login\" method=\"post\"><label for=\"email\">Email</label> <input id=\"email\" type=\"email\" autocomplete=\"name\" name=\"email\" required> <label for=\"password\">Password</label> <input id=\"password\" type=\"text\" autocomplete=\"current-password\" name=\"password\" required> <button type=\"submit\">Submit</button></form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<h1>Login Guest</h1><form action=\"/login\" method=\"post\"><input type=\"hidden\" name=\"csrf_token\" value=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var2 string
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(csrfToken)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/login/login.templ`, Line: 12, Col: 59}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"> <label for=\"email\">Email</label> <input id=\"email\" type=\"email\" autocomplete=\"name\" name=\"email\" required> <label for=\"password\">Password</label> <input id=\"password\" type=\"text\" autocomplete=\"current-password\" name=\"password\" required> <button type=\"submit\">Submit</button></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<h1>You are logged in!</h1>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<h1>You are logged in!</h1>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

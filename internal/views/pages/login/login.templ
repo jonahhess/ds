@@ -5,10 +5,11 @@ import (
 	"github.com/jonahhess/ds/internal/views/components/toast"
 )
 
-templ Login(errMsg string) {
+templ Login(errMsg string, csrfToken string) {
 	if _, ok := auth.UserIDFromContext(ctx); !ok {
 		<h1>Login Guest</h1>
 		<form action="/login" method="post">
+			<input type="hidden" name="csrf_token" value={ csrfToken }/>
 			<label for="email">Email</label>
 			<input id="email" type="email" autocomplete="name" name="email" required/>
 			<label for="password">Password</label>
