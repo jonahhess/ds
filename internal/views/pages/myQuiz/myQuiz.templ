@@ -6,9 +6,10 @@ import (
 	"slices"
 )
 
-templ MyQuiz(userID int, courseID int, lessonIndex int, quizID int, quiz *types.Quiz, mistakes []int) {
+templ MyQuiz(userID int, courseID int, lessonIndex int, quizID int, quiz *types.Quiz, mistakes []int, csrfToken string) {
 	<a href={ fmt.Sprintf("/users/%d/courses/%d/lessons/%d", userID, courseID, lessonIndex) }>Back to Lesson</a>
 	<form method="post" action={ fmt.Sprintf("/users/%d/courses/%d/lessons/%d/quizzes/%d", userID, courseID, lessonIndex, quizID) }>
+		<input type="hidden" name="csrf_token" value={ csrfToken }/>
 		if len(quiz.Questions) == 0 {
 			<p>No questions</p>
 		} else {
