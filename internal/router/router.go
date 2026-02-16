@@ -39,15 +39,16 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 	r.Use(middleware.Timeout(60 * time.Second))
 
 	r.Use(auth.SessionMiddleware(sessionStore))
+	r.Use(auth.CSRFMiddleware())
 	r.Use(auth.OptionalUserMiddleware)
 
 	r.Group( func(r chi.Router) {
 		r.Get("/", home.Page)
 		r.Get("/about", about.Page)
 		r.Get("/login", login.Page)
-		r.Post("/login", auth.LoginHandler)
+		r.Post("/login", auth.LoginHandler(DB))
 		r.Get("/signup", signup.Page)
-		r.Post("/signup", signup.SignupHandler)
+		r.Post("/signup", signup.SignupHandler(DB))
 		r.Post("/logout", auth.LogoutHandler)
 		r.NotFound(notFound.Page)
 	})
@@ -65,8 +66,13 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 		r.Get("/study", study.Page)
 		r.Route("/review", func(r chi.Router) {
 			r.Get("/", review.Page(DB))
-			r.Get("/next", review.GetNextCard(DB))
-			r.Post("/submit", review.SubmitAnswer(DB))
+			r.Get("/next", review.NextCard(DB))
+			r.Get("/complete", review.Complete(DB))
+			r.Route("/card/{cardID}", func(r chi.Router) {
+				r.Use(params.Int("cardID"))
+				r.Get("/answer", review.ShowAnswer(DB))
+				r.Post("/rate", review.RateCard(DB))
+			})
 		})
 
 		r.Route("/users/{userID}", func(r chi.Router) {
@@ -77,7 +83,7 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 				r.Route("/{courseID}", func(r chi.Router) {
 					r.Use(params.Int("courseID"))
 					r.Get("/", myCourse.Page(DB))
-					r.Get("/remove", myCourse.Remove(DB))
+					r.Post("/remove", myCourse.Remove(DB))
 					r.Route("/lessons/{lessonIndex}", func(r chi.Router) {
 						r.Use(params.Int("lessonIndex"))
 						r.Route("/quizzes/{quizID}", func(r chi.Router) {
