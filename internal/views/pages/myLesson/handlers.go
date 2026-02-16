@@ -1,4 +1,4 @@
-package lesson
+package myLesson
 
 import (
 	"database/sql"
@@ -52,7 +52,7 @@ func Page(DB *sql.DB) http.HandlerFunc {
 			return
 		}
 		
-		  if err := layouts.Base("My Lesson", Lesson(userID, courseID, lessonIndex, *myData)).
+		  if err := layouts.Base("My Lesson", MyLesson(userID, courseID, lessonIndex, *myData)).
 		  Render(ctx, w); err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 		  }
