@@ -17,11 +17,13 @@ func InitDB(path string) error {
 		return err
 	}
 
-	DB.Exec(`
+	if _, err := DB.Exec(`
         PRAGMA foreign_keys = ON;
         PRAGMA journal_mode = WAL;
         PRAGMA synchronous = NORMAL;
-    `)
+    `); err != nil {
+		return err
+	}
 
 	return DB.Ping()
 }
@@ -33,12 +35,14 @@ func CloseDB() error {
 	return nil
 }
 
-func execSQL(db *sql.DB, sqlStmt string) {
+func execSQL(db *sql.DB, sqlStmt string) error {
     _, err := db.Exec(sqlStmt)
     if err != nil {
-        log.Fatalf("Error executing SQL: %v\nSQL:\n%s", err, sqlStmt)
+        log.Printf("Error executing SQL: %v\nSQL:\n%s", err, sqlStmt)
+        return err
     }
-  }
+    return nil
+}
 
 
 func CreateTables() error {
@@ -148,7 +152,9 @@ func CreateTables() error {
     tables := []string{users,courses,user_courses,lessons,quizzes,questions,answers,correct_answers,reviewcards}
 
     for _, tbl := range tables {
-        execSQL(DB, tbl)
+        if err := execSQL(DB, tbl); err != nil {
+            return err
+        }
     }
 
         _, err := DB.Exec(`
@@ -172,9 +178,9 @@ func CreateTables() error {
         END;
     END;
 `)
-if err != nil {
-    log.Fatal(err)
-}
+    if err != nil {
+        return err
+    }
 
 	return nil
 }
