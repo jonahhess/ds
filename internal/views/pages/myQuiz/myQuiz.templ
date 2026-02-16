@@ -3,17 +3,19 @@ package myQuiz
 import (
 	"fmt"
 	"github.com/jonahhess/ds/internal/types"
+	"slices"
 )
 
-templ MyQuiz(userID int, quizID int, quiz *types.Quiz) {
-	<form method="post" action={ fmt.Sprintf("/users/%d/quizzes/%d", userID, quizID) }>
+templ MyQuiz(userID int, courseID int, lessonIndex int, quizID int, quiz *types.Quiz, mistakes []int) {
+	<a href={ fmt.Sprintf("/users/%d/courses/%d/lessons/%d", userID, courseID, lessonIndex) }>Back to Lesson</a>
+	<form method="post" action={ fmt.Sprintf("/users/%d/courses/%d/lessons/%d/quizzes/%d", userID, courseID, lessonIndex, quizID) }>
 		if len(quiz.Questions) == 0 {
 			<p>No questions</p>
 		} else {
 			<ol>
 				for _, v := range quiz.Questions {
 					<li>
-						<p>{ v.Text }</p>
+						<p style={ templ.KV("background-color: #ff0000", slices.Contains(mistakes, v.ID)) }>{ v.Text }</p>
 						<label for={ v.ID }>Choose an answer</label>
 						<select name={ v.ID } id={ v.ID }>
 							for _,q := range v.Answers {
