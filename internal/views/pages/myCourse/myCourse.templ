@@ -4,7 +4,7 @@ import "fmt"
 import "github.com/jonahhess/ds/internal/types"
 import "strconv"
 
-templ MyCourse(userID int, courseData types.MyCourseData) {
+templ MyCourse(userID int, courseData types.MyCourseData, csrfToken string) {
 	<h1>My Course</h1>
 	<div id="courseInfo">
 		<h2>Title: { courseData.Title }</h2>
@@ -17,5 +17,8 @@ templ MyCourse(userID int, courseData types.MyCourseData) {
 	}
 	<a href={ fmt.Sprintf("/courses/%d", courseData.CourseID) }>Course Page</a>
 	<a href={ fmt.Sprintf("/users/%d/courses", userID) }>My Courses</a>
-	<a href={ fmt.Sprintf("/users/%d/courses/%d/remove", userID, courseData.CourseID) }>Remove Course</a>
+	<form method="post" action={ fmt.Sprintf("/users/%d/courses/%d/remove", userID, courseData.CourseID) }>
+		<input type="hidden" name="csrf_token" value={ csrfToken }/>
+		<button type="submit">Remove Course</button>
+	</form>
 }
