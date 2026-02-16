@@ -1,4 +1,4 @@
-package quiz
+package myQuiz
 
 import (
 	"database/sql"

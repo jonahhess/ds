@@ -15,8 +15,8 @@ import (
 	"github.com/jonahhess/ds/internal/views/pages/login"
 	"github.com/jonahhess/ds/internal/views/pages/myCourse"
 	"github.com/jonahhess/ds/internal/views/pages/myCourses"
+	"github.com/jonahhess/ds/internal/views/pages/myQuiz"
 	"github.com/jonahhess/ds/internal/views/pages/notFound"
-	"github.com/jonahhess/ds/internal/views/pages/quiz"
 	"github.com/jonahhess/ds/internal/views/pages/review"
 	"github.com/jonahhess/ds/internal/views/pages/signup"
 	"github.com/jonahhess/ds/internal/views/pages/study"
@@ -84,7 +84,7 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 			})
 			r.Route("/quizzes/{quizID}", func(r chi.Router) {
 				r.Use(params.Int("quizID"))
-				r.Get("/",quiz.Page(DB))
+				r.Get("/",myQuiz.Page(DB))
 				//r.Post("/", quiz.Submit(DB))
 			})
 		})
