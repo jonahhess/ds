@@ -10,6 +10,9 @@ import (
 	about "github.com/jonahhess/ds/internal/views/pages/about"
 	"github.com/jonahhess/ds/internal/views/pages/course"
 	"github.com/jonahhess/ds/internal/views/pages/courses"
+	"github.com/jonahhess/ds/internal/views/pages/creator"
+	creatorCourse "github.com/jonahhess/ds/internal/views/pages/creatorCourse"
+	"github.com/jonahhess/ds/internal/views/pages/dashboard"
 	home "github.com/jonahhess/ds/internal/views/pages/home"
 	"github.com/jonahhess/ds/internal/views/pages/login"
 	"github.com/jonahhess/ds/internal/views/pages/myAvailableCourses"
@@ -18,6 +21,7 @@ import (
 	"github.com/jonahhess/ds/internal/views/pages/myLesson"
 	"github.com/jonahhess/ds/internal/views/pages/myQuiz"
 	"github.com/jonahhess/ds/internal/views/pages/notFound"
+	"github.com/jonahhess/ds/internal/views/pages/profile"
 	"github.com/jonahhess/ds/internal/views/pages/review"
 	"github.com/jonahhess/ds/internal/views/pages/signup"
 	"github.com/jonahhess/ds/internal/views/pages/study"
@@ -26,6 +30,20 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/gorilla/sessions"
 )
+
+// MethodOverrideMiddleware handles _method form field to override HTTP method
+func MethodOverrideMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			if err := r.ParseForm(); err == nil {
+				if method := r.FormValue("_method"); method != "" {
+					r.Method = method
+				}
+			}
+		}
+		next.ServeHTTP(w, r)
+	})
+}
 
 func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 	r := chi.NewRouter()
@@ -40,6 +58,7 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 
 	r.Use(auth.SessionMiddleware(sessionStore))
 	r.Use(auth.CSRFMiddleware())
+	r.Use(MethodOverrideMiddleware)
 	r.Use(auth.OptionalUserMiddleware)
 
 	r.Group( func(r chi.Router) {
@@ -55,6 +74,82 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 	
 	r.Group(func(r chi.Router) {
 		r.Use(auth.RequireAuthMiddleware)
+		
+		// Profile routes
+		r.Route("/profile", func(r chi.Router) {
+			r.Get("/", profile.ViewPage(DB))
+			r.Get("/edit", profile.EditPage(DB))
+			r.Patch("/", profile.Update(DB))
+			r.Get("/password", profile.ChangePasswordPage(DB))
+			r.Post("/password", profile.ChangePasswordHandler(DB))
+			r.Get("/delete", profile.DeletePage(DB))
+			r.Delete("/", profile.Delete(DB))
+		})
+
+		// Dashboard and analytics
+		r.Get("/dashboard", dashboard.Page(DB))
+		r.Route("/dashboard", func(r chi.Router) {
+			r.Route("/{courseID}", func(r chi.Router) {
+				r.Use(params.Int("courseID"))
+				r.Get("/", dashboard.CourseProgressPage(DB))
+			})
+		})
+
+		// Creator routes
+		r.Route("/creator", func(r chi.Router) {
+			r.Get("/", creator.Page(DB))
+			
+			// Creator courses management
+			r.Route("/courses", func(r chi.Router) {
+				r.Get("/new", creatorCourse.NewPage())
+				r.Post("/", creatorCourse.Create(DB))
+				
+				r.Route("/{courseID}", func(r chi.Router) {
+					r.Use(params.Int("courseID"))
+					r.Use(auth.RequireCreatorMiddleware(DB))
+					
+					r.Get("/", creatorCourse.DetailPage(DB))
+					r.Get("/edit", creatorCourse.EditPage(DB))
+					r.Patch("/", creatorCourse.Update(DB))
+					r.Delete("/", creatorCourse.Delete(DB))
+					
+					// Creator lesson management
+					r.Route("/lessons/{lessonIndex}", func(r chi.Router) {
+						r.Use(params.Int("lessonIndex"))
+						r.Get("/new", creatorCourse.LessonNewPage())
+						r.Post("/", creatorCourse.LessonCreate(DB))
+						r.Get("/edit", creatorCourse.LessonEditPage(DB))
+						r.Patch("/", creatorCourse.LessonUpdate(DB))
+						r.Delete("/", creatorCourse.LessonDelete(DB))
+						
+						// Creator quiz management
+						r.Route("/quizzes", func(r chi.Router) {
+							r.Get("/new", creatorCourse.QuizNewPage(DB))
+							r.Post("/", creatorCourse.QuizCreate(DB))
+							
+							r.Route("/{quizID}", func(r chi.Router) {
+								r.Use(params.Int("quizID"))
+								r.Delete("/", creatorCourse.QuizDelete(DB))
+								
+								// Creator question/answer management
+								r.Route("/questions", func(r chi.Router) {
+									r.Get("/new", creatorCourse.QuestionNewPage(DB))
+									r.Post("/", creatorCourse.QuestionCreate(DB))
+									
+									r.Route("/{questionID}", func(r chi.Router) {
+										r.Use(params.Int("questionID"))
+										r.Get("/edit", creatorCourse.QuestionEditPage(DB))
+										r.Patch("/", creatorCourse.QuestionUpdate(DB))
+										r.Delete("/", creatorCourse.QuestionDelete(DB))
+									})
+								})
+							})
+						})
+					})
+				})
+			})
+		})
+
 		r.Route("/courses", func(r chi.Router) {
 			r.Route("/{courseID}", func(r chi.Router) {
 				r.Use(params.Int("courseID"))

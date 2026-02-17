@@ -1,0 +1,60 @@
+package creator
+
+import (
+	"database/sql"
+	"fmt"
+)
+
+type CreatorCourse struct {
+	ID          int
+	Title       string
+	Description sql.NullString
+	CreatedAt   string
+}
+
+templ CreatorDashboard(courses []CreatorCourse) {
+	<div class="container">
+		<h1>Creator Dashboard</h1>
+		<p>Manage your courses and content</p>
+		<div class="actions">
+			<a href="/creator/courses/new" class="btn btn-primary">Create New Course</a>
+		</div>
+		if len(courses) == 0 {
+			<p class="empty-state">You haven't created any courses yet. Start by creating your first course!</p>
+		} else {
+			<table class="courses-table">
+				<thead>
+					<tr>
+						<th>Course Title</th>
+						<th>Description</th>
+						<th>Created</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, course := range courses {
+						<tr>
+							<td>
+								<a href={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d", course.ID)) }>
+									{ course.Title }
+								</a>
+							</td>
+							<td>
+								if course.Description.Valid {
+									{ course.Description.String }
+								} else {
+									<em>No description</em>
+								}
+							</td>
+							<td>{ course.CreatedAt }</td>
+							<td>
+								<a href={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d", course.ID)) } class="btn btn-sm">View</a>
+								<a href={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d/edit", course.ID)) } class="btn btn-sm">Edit</a>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		}
+	</div>
+}

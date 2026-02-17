@@ -1,0 +1,107 @@
+package profile
+
+type UserProfile struct {
+	ID        int
+	Name      string
+	Email     string
+	CreatedAt string
+}
+
+templ ViewProfile(user UserProfile) {
+	<div class="container">
+		<h1>My Profile</h1>
+		<div class="profile-card">
+			<div class="profile-field">
+				<label>Name</label>
+				<p>{ user.Name }</p>
+			</div>
+			<div class="profile-field">
+				<label>Email</label>
+				<p>{ user.Email }</p>
+			</div>
+			<div class="profile-field">
+				<label>Member Since</label>
+				<p>{ user.CreatedAt }</p>
+			</div>
+		</div>
+		<div class="profile-actions">
+			<a href="/profile/edit" class="btn btn-primary">Edit Profile</a>
+			<a href="/profile/password" class="btn btn-secondary">Change Password</a>
+		</div>
+		<div class="danger-zone">
+			<h2>Danger Zone</h2>
+			<p>Permanently delete your account and all associated data.</p>
+			<a href="/profile/delete" class="btn btn-danger">Delete Account</a>
+		</div>
+	</div>
+}
+
+templ EditProfile(user UserProfile, csrfToken string) {
+	<div class="container">
+		<h1>Edit Profile</h1>
+		<form action="/profile" method="post">
+			<input type="hidden" name="csrf_token" value={ csrfToken }/>
+			<input type="hidden" name="_method" value="PATCH"/>
+			<div class="form-group">
+				<label for="name">Name</label>
+				<input id="name" type="text" name="name" required value={ user.Name }/>
+			</div>
+			<div class="form-group">
+				<label for="email">Email</label>
+				<input id="email" type="email" name="email" required value={ user.Email }/>
+			</div>
+			<div class="form-actions">
+				<button type="submit" class="btn btn-primary">Save Changes</button>
+				<a href="/profile" class="btn btn-secondary">Cancel</a>
+			</div>
+		</form>
+	</div>
+}
+
+templ ChangePassword(csrfToken string) {
+	<div class="container">
+		<h1>Change Password</h1>
+		<form action="/profile/password" method="post">
+			<input type="hidden" name="csrf_token" value={ csrfToken }/>
+			<div class="form-group">
+				<label for="current_password">Current Password</label>
+				<input id="current_password" type="password" name="current_password" required placeholder="Enter your current password"/>
+			</div>
+			<div class="form-group">
+				<label for="new_password">New Password</label>
+				<input id="new_password" type="password" name="new_password" required placeholder="Enter new password"/>
+			</div>
+			<div class="form-group">
+				<label for="confirm_password">Confirm Password</label>
+				<input id="confirm_password" type="password" name="confirm_password" required placeholder="Confirm new password"/>
+			</div>
+			<div class="form-actions">
+				<button type="submit" class="btn btn-primary">Update Password</button>
+				<a href="/profile" class="btn btn-secondary">Cancel</a>
+			</div>
+		</form>
+	</div>
+}
+
+templ ConfirmDeleteAccount(csrfToken string) {
+	<div class="container">
+		<div class="warning-box">
+			<h1>Delete Account</h1>
+			<p>This action cannot be undone. Deleting your account will:</p>
+			<ul>
+				<li>Remove all your personal information</li>
+				<li>Remove you from all courses</li>
+				<li>Delete all your review cards and progress</li>
+				<li>Delete all courses you created</li>
+			</ul>
+		</div>
+		<form action="/profile" method="post">
+			<input type="hidden" name="csrf_token" value={ csrfToken }/>
+			<input type="hidden" name="_method" value="DELETE"/>
+			<div class="form-actions">
+				<button type="submit" class="btn btn-danger" onclick="return confirm('Are you absolutely sure? This cannot be undone.')">Yes, Delete My Account</button>
+				<a href="/profile" class="btn btn-secondary">Cancel</a>
+			</div>
+		</form>
+	</div>
+}
