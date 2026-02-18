@@ -67,7 +67,7 @@ func NextCard(DB *sql.DB) http.HandlerFunc {
 	}
 }
 
-// ShowAnswer - GET /review/card/{cardID}/answer - Show answer side of card
+// ShowAnswer - GET /review/card/{questionID}/answer - Show answer side of card
 func ShowAnswer(DB *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -76,14 +76,14 @@ func ShowAnswer(DB *sql.DB) http.HandlerFunc {
 			errors.HandleUnauthorized(w, r)
 			return
 		}
-
-		cardID, ok := params.IntFrom(ctx, "cardID")
+		
+		questionID, ok := params.IntFrom(ctx, "questionID")
 		if !ok {
-			errors.HandleBadRequest(w, r, "card id not found")
+			errors.HandleBadRequest(w, r, "question id not found")
 			return
 		}
 
-		card, correctAnswer, err := fetchCardByID(DB, userID, cardID)
+		card, correctAnswer, err := fetchCardByID(DB, userID, questionID)
 		if err != nil {
 			errors.HandleInternalError(w, r, err)
 			return
@@ -102,7 +102,7 @@ func ShowAnswer(DB *sql.DB) http.HandlerFunc {
 	}
 }
 
-// RateCard - POST /review/card/{cardID}/rate - Rate card quality and update SM2
+// RateCard - POST /review/card/{questionID}/rate - Rate card quality and update SM2
 func RateCard(DB *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -112,9 +112,9 @@ func RateCard(DB *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		cardID, ok := params.IntFrom(ctx, "cardID")
+		questionID, ok := params.IntFrom(ctx, "questionID")
 		if !ok {
-			errors.HandleBadRequest(w, r, "card id not found")
+			errors.HandleBadRequest(w, r, "question id not found")
 			return
 		}
 
@@ -136,7 +136,7 @@ func RateCard(DB *sql.DB) http.HandlerFunc {
 		}
 
 		// Fetch card
-		card, correctAnswer, err := fetchCardByID(DB, userID, cardID)
+		card, correctAnswer, err := fetchCardByID(DB, userID, questionID)
 		if err != nil || card == nil || correctAnswer == "" {
 			errors.HandleInternalError(w, r, err)
 			return
@@ -146,7 +146,7 @@ func RateCard(DB *sql.DB) http.HandlerFunc {
 		newReviewAt, newRepetitions, newInterval, newEasiness := applySM2(card, quality)
 
 		// Update card in database
-		if err := updateCardReview(DB, userID, cardID, newReviewAt, newRepetitions, newInterval, newEasiness, quality); err != nil {
+		if err := updateCardReview(DB, userID, questionID, newReviewAt, newRepetitions, newInterval, newEasiness, quality); err != nil {
 			errors.HandleInternalError(w, r, err)
 			return
 		}
@@ -314,9 +314,8 @@ func fetchNextCard(DB *sql.DB, userID int) (*types.ReviewCard, error) {
 	return &card, nil
 }
 
-func fetchCardByID(DB *sql.DB, userID int, cardID int) (*types.ReviewCard, string, error) {
+func fetchCardByID(DB *sql.DB, userID int, questionID int) (*types.ReviewCard, string, error) {
 	var card types.ReviewCard
-	var questionID int
 
 	row := DB.QueryRow(`
 		SELECT 
@@ -332,8 +331,8 @@ func fetchCardByID(DB *sql.DB, userID int, cardID int) (*types.ReviewCard, strin
 			rc.created_at
 		FROM reviewcards rc
 		JOIN questions q ON q.id = rc.question_id
-		WHERE rc.id = ? AND rc.user_id = ?
-	`, cardID, userID)
+		WHERE rc.question_id = ? AND rc.user_id = ?
+	`, questionID, userID)
 
 	err := row.Scan(
 		&card.ID,
@@ -392,7 +391,7 @@ func fetchCardByID(DB *sql.DB, userID int, cardID int) (*types.ReviewCard, strin
 	return &card, correctAnswer, nil
 }
 
-func updateCardReview(DB *sql.DB, userID int, cardID int, reviewAt time.Time, repetitions int, interval int, easiness float64, quality int) error {
+func updateCardReview(DB *sql.DB, userID int, questionID int, reviewAt time.Time, repetitions int, interval int, easiness float64, quality int) error {
 	// Update SM2 fields and increment counters
 	_, err := DB.Exec(`
 		UPDATE reviewcards 
@@ -407,7 +406,7 @@ func updateCardReview(DB *sql.DB, userID int, cardID int, reviewAt time.Time, re
 	`, reviewAt, repetitions, interval, easiness, 
 		// If quality >= 3, count as success (1), otherwise 0
 		map[bool]int{true: 1, false: 0}[quality >= 3],
-		cardID, userID)
+		questionID, userID)
 	return err
 }
 
