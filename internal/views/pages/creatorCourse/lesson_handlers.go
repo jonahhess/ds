@@ -2,10 +2,9 @@ package creatorcourse
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
-	"strconv"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/jonahhess/ds/internal/auth"
 	"github.com/jonahhess/ds/internal/params"
 	"github.com/jonahhess/ds/internal/views/layouts"
@@ -13,9 +12,14 @@ import (
 
 func LessonNewPage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		courseID, _ := strconv.Atoi(chi.URLParam(r, "courseID"))
-		csrfToken := auth.CSRFTokenFromContext(r.Context())
-		err := layouts.Base("Create New Lesson", NewLesson(courseID, csrfToken)).Render(r.Context(), w)
+		ctx := r.Context()
+		courseID, ok := params.IntFrom(ctx, "courseID")
+		if !ok {
+			http.Error(w, "Invalid course ID", http.StatusBadRequest)
+			return
+		}
+		csrfToken := auth.CSRFTokenFromContext(ctx)
+		err := layouts.Base("Create New Lesson", NewLesson(courseID, csrfToken)).Render(ctx, w)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
@@ -24,20 +28,26 @@ func LessonNewPage() http.HandlerFunc {
 
 func LessonCreate(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID, ok := auth.UserIDFromContext(r.Context())
+		ctx := r.Context()
+		userID, ok := auth.UserIDFromContext(ctx)
 		if !ok {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 
-		courseID, ok := params.IntFrom(r.Context(), "courseID")
+		courseID, ok := params.IntFrom(ctx, "courseID")
 		if !ok {
 			http.Error(w, "Invalid course ID", http.StatusBadRequest)
 			return
 		}
 
-		title := r.FormValue("title")
-		text := r.FormValue("text")
+		err := r.ParseForm()
+		if err != nil {
+			http.Error(w, "Failed to parse form", http.StatusBadRequest)
+			return
+		}
+		title := r.Form.Get("title")
+		text := r.Form.Get("text")
 
 		if title == "" || text == "" {
 			http.Error(w, "Title and text are required", http.StatusBadRequest)
@@ -45,9 +55,9 @@ func LessonCreate(db *sql.DB) http.HandlerFunc {
 		}
 
 		var maxIndex int
-		db.QueryRow("SELECT COALESCE(MAX(lesson_index), 0) FROM lessons WHERE course_id = ?", courseID).Scan(&maxIndex)
+		db.QueryRow("SELECT COALESCE(MAX(lesson_index), 1) FROM lessons WHERE course_id = ?", courseID).Scan(&maxIndex)
 
-		_, err := db.Exec(
+		_, err = db.Exec(
 			"INSERT INTO lessons (course_id, lesson_index, title, text, created_by) VALUES (?, ?, ?, ?, ?)",
 			courseID, maxIndex+1, title, text, userID,
 		)
@@ -56,37 +66,38 @@ func LessonCreate(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		http.Redirect(w, r, "/creator/courses/"+strconv.Itoa(courseID), http.StatusSeeOther)
+		http.Redirect(w, r, fmt.Sprintf("/creator/courses/%d/lessons/%d", courseID, maxIndex+1), http.StatusSeeOther)
 	}
 }
 
 func LessonEditPage(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		courseID, ok := params.IntFrom(r.Context(), "courseID")
+		ctx := r.Context()
+		courseID, ok := params.IntFrom(ctx, "courseID")
 		if !ok {
 			http.Error(w, "Invalid course ID", http.StatusBadRequest)
 			return
 		}
-		lessonIndex, ok := params.IntFrom(r.Context(), "lessonIndex")
+		lessonIndex, ok := params.IntFrom(ctx, "lessonIndex")
 		if !ok {
 			http.Error(w, "Invalid lesson index", http.StatusBadRequest)
 			return
 		}
 
-		var title, text string
+		var title, text sql.NullString
 		err := db.QueryRow(
 			"SELECT title, text FROM lessons WHERE course_id = ? AND lesson_index = ?",
 			courseID, lessonIndex,
-		).Scan(&title, &text)
+		).Scan(&title.String, &text.String)
 
 		if err != nil {
 			http.Error(w, "Lesson not found", http.StatusNotFound)
 			return
 		}
 
-		csrfToken := auth.CSRFTokenFromContext(r.Context())
-		lesson := LessonForm{CourseID: courseID, LessonIndex: lessonIndex, Title: title, Text: text}
-		err = layouts.Base("Edit Lesson", EditLesson(lesson, csrfToken)).Render(r.Context(), w)
+		csrfToken := auth.CSRFTokenFromContext(ctx)
+		lesson := LessonForm{CourseID: courseID, LessonIndex: lessonIndex, Title: title.String, Text: text.String}
+		err = layouts.Base("Edit Lesson", EditLesson(lesson, csrfToken)).Render(ctx, w)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
@@ -95,18 +106,19 @@ func LessonEditPage(db *sql.DB) http.HandlerFunc {
 
 func LessonUpdate(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID, ok := auth.UserIDFromContext(r.Context())
+		ctx := r.Context()
+		userID, ok := auth.UserIDFromContext(ctx)
 		if !ok {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 
-		courseID, ok := params.IntFrom(r.Context(), "courseID")
+		courseID, ok := params.IntFrom(ctx, "courseID")
 		if !ok {
 			http.Error(w, "Invalid course ID", http.StatusBadRequest)
 			return
 		}
-		lessonIndex, ok := params.IntFrom(r.Context(), "lessonIndex")
+		lessonIndex, ok := params.IntFrom(ctx, "lessonIndex")
 		if !ok {
 			http.Error(w, "Invalid lesson index", http.StatusBadRequest)
 			return
@@ -119,27 +131,41 @@ func LessonUpdate(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		title := r.FormValue("title")
-		text := r.FormValue("text")
+		err := r.ParseForm()
+		if err != nil {
+			http.Error(w, "Failed to parse form", http.StatusBadRequest)
+			return
+		}
+		title := r.Form.Get("title")
+		text := r.Form.Get("text")
+		if title == "" || text == "" {
+			http.Error(w, "Title and text are required", http.StatusBadRequest)
+			return
+		}
 
-		db.Exec(
+		_, err = db.Exec(
 			"UPDATE lessons SET title = ?, text = ? WHERE course_id = ? AND lesson_index = ?",
 			title, text, courseID, lessonIndex,
 		)
 
-		http.Redirect(w, r, "/creator/courses/"+strconv.Itoa(courseID), http.StatusSeeOther)
+		http.Redirect(w, r, fmt.Sprintf("/creator/courses/%d/lessons/%d", courseID, lessonIndex), http.StatusSeeOther)
 	}
 }
 
 func LessonDelete(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID, ok := auth.UserIDFromContext(r.Context())
+		ctx := r.Context()
+		userID, ok := auth.UserIDFromContext(ctx)
 		if !ok {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 
-		courseID, _ := strconv.Atoi(chi.URLParam(r, "courseID"))
+		courseID, ok := params.IntFrom(ctx, "courseID")
+		if !ok {
+			http.Error(w, "Invalid course ID", http.StatusBadRequest)
+			return
+		}
 
 		var createdBy int
 		err := db.QueryRow("SELECT created_by FROM courses WHERE id = ?", courseID).Scan(&createdBy)
@@ -152,13 +178,17 @@ func LessonDelete(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		lessonIndex, _ := strconv.Atoi(chi.URLParam(r, "lessonIndex"))
+		lessonIndex, ok := params.IntFrom(ctx, "lessonIndex")
+		if !ok {
+			http.Error(w, "Invalid lesson index", http.StatusBadRequest)
+			return
+		}
 		_, err = db.Exec("DELETE FROM lessons WHERE course_id = ? AND lesson_index = ?", courseID, lessonIndex)
 		if err != nil {
 			http.Error(w, "Database error", http.StatusInternalServerError)
 			return
 		}
 
-		http.Redirect(w, r, "/creator/courses/"+strconv.Itoa(courseID), http.StatusSeeOther)
+		http.Redirect(w, r, fmt.Sprintf("/creator/courses/%d/lessons/%d", courseID, lessonIndex), http.StatusSeeOther)
 	}
 }
