@@ -55,7 +55,7 @@ func LessonCreate(db *sql.DB) http.HandlerFunc {
 		}
 
 		var maxIndex int
-		db.QueryRow("SELECT COALESCE(MAX(lesson_index), 1) FROM lessons WHERE course_id = ?", courseID).Scan(&maxIndex)
+		db.QueryRow("SELECT COALESCE(MAX(lesson_index), 0) FROM lessons WHERE course_id = ?", courseID).Scan(&maxIndex)
 
 		_, err = db.Exec(
 			"INSERT INTO lessons (course_id, lesson_index, title, text, created_by) VALUES (?, ?, ?, ?, ?)",
@@ -66,7 +66,7 @@ func LessonCreate(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/creator/courses/%d/lessons/%d", courseID, maxIndex+1), http.StatusSeeOther)
+		http.Redirect(w, r, fmt.Sprintf("/creator/courses/%d/", courseID), http.StatusSeeOther)
 	}
 }
 
