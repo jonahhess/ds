@@ -311,9 +311,9 @@ func CourseDetail(course CourseForm, lessons []LessonDisplay, csrfToken string) 
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var17 string
-				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", lesson.Index+1))
+				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", lesson.Index))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/creatorCourse/course.templ`, Line: 98, Col: 56}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/creatorCourse/course.templ`, Line: 98, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 				if templ_7745c5c3_Err != nil {
@@ -326,7 +326,7 @@ func CourseDetail(course CourseForm, lessons []LessonDisplay, csrfToken string) 
 				var templ_7745c5c3_Var18 string
 				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(lesson.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/creatorCourse/course.templ`, Line: 98, Col: 74}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/creatorCourse/course.templ`, Line: 98, Col: 70}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 				if templ_7745c5c3_Err != nil {
@@ -337,9 +337,9 @@ func CourseDetail(course CourseForm, lessons []LessonDisplay, csrfToken string) 
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var19 templ.SafeURL
-				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/edit", course.ID, lesson.Index+1)))
+				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/edit", course.ID, lesson.Index)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/creatorCourse/course.templ`, Line: 100, Col: 111}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/creatorCourse/course.templ`, Line: 100, Col: 109}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 				if templ_7745c5c3_Err != nil {
@@ -355,9 +355,9 @@ func CourseDetail(course CourseForm, lessons []LessonDisplay, csrfToken string) 
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var20 templ.SafeURL
-					templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quizzes/%d", course.ID, lesson.Index+1, lesson.QuizID)))
+					templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quizzes/%d", course.ID, lesson.Index, lesson.QuizID)))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/creatorCourse/course.templ`, Line: 102, Col: 133}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/creatorCourse/course.templ`, Line: 102, Col: 131}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 					if templ_7745c5c3_Err != nil {
@@ -373,9 +373,9 @@ func CourseDetail(course CourseForm, lessons []LessonDisplay, csrfToken string) 
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var21 templ.SafeURL
-					templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quizzes/new", course.ID, lesson.Index+1)))
+					templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quizzes/new", course.ID, lesson.Index)))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/creatorCourse/course.templ`, Line: 104, Col: 119}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/creatorCourse/course.templ`, Line: 104, Col: 117}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 					if templ_7745c5c3_Err != nil {
@@ -391,9 +391,9 @@ func CourseDetail(course CourseForm, lessons []LessonDisplay, csrfToken string) 
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var22 templ.SafeURL
-				templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d", course.ID, lesson.Index+1)))
+				templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d", course.ID, lesson.Index)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/creatorCourse/course.templ`, Line: 106, Col: 111}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/creatorCourse/course.templ`, Line: 106, Col: 109}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 				if templ_7745c5c3_Err != nil {

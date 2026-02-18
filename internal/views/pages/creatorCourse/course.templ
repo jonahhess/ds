@@ -95,15 +95,15 @@ templ CourseDetail(course CourseForm, lessons []LessonDisplay, csrfToken string)
 					for _, lesson := range lessons {
 						<div class="lesson-card">
 							<div class="lesson-header">
-								<h3>Lesson { fmt.Sprintf("%d", lesson.Index + 1) }: { lesson.Title }</h3>
+								<h3>Lesson { fmt.Sprintf("%d", lesson.Index) }: { lesson.Title }</h3>
 								<div class="lesson-actions">
-									<a href={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/edit", course.ID, lesson.Index+1)) } class="btn btn-sm btn-primary">Edit</a>
+									<a href={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/edit", course.ID, lesson.Index)) } class="btn btn-sm btn-primary">Edit</a>
 									if lesson.QuizID > 0 {
-										<a href={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quizzes/%d", course.ID, lesson.Index+1, lesson.QuizID)) } class="btn btn-sm btn-primary">View Quiz</a>
+										<a href={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quizzes/%d", course.ID, lesson.Index, lesson.QuizID)) } class="btn btn-sm btn-primary">View Quiz</a>
 									} else {
-										<a href={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quizzes/new", course.ID, lesson.Index+1)) } class="btn btn-sm btn-success">Add/Edit Quiz</a>
+										<a href={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quizzes/new", course.ID, lesson.Index)) } class="btn btn-sm btn-success">Add/Edit Quiz</a>
 									}
-									<form action={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d", course.ID, lesson.Index+1)) } method="post" style="display: inline;">
+									<form action={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d", course.ID, lesson.Index)) } method="post" style="display: inline;">
 										<input type="hidden" name="csrf_token" value={ csrfToken }/>
 										<input type="hidden" name="_method" value="DELETE"/>
 										<button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this lesson?')">Delete</button>
