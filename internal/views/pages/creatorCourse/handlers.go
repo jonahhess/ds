@@ -191,7 +191,7 @@ func DetailPage(db *sql.DB) http.HandlerFunc {
 		err := db.QueryRow(
 			"SELECT title, description FROM courses WHERE id = ?",
 			courseID,
-		).Scan(&title, &description)
+		).Scan(&title.String, &description.String)
 
 		if err == sql.ErrNoRows {
 			http.Error(w, "Course not found", http.StatusNotFound)
@@ -204,7 +204,7 @@ func DetailPage(db *sql.DB) http.HandlerFunc {
 
 		// Fetch lessons for this course
 		rows, err := db.Query(
-			"SELECT lesson_index, title, text, quizzes.id FROM lessons join quizzes on lessons.id = quizzes.lesson_id WHERE course_id = ? ORDER BY lesson_index",
+			"SELECT lesson_index, title, text, COALESCE(quizzes.id, 0) FROM lessons LEFT JOIN quizzes on lessons.id = quizzes.lesson_id WHERE course_id = ? ORDER BY lesson_index",
 			courseID,
 		)
 		if err != nil {
@@ -229,8 +229,8 @@ func DetailPage(db *sql.DB) http.HandlerFunc {
 			Description: description,
 		}
 
-		csrfToken := auth.CSRFTokenFromContext(r.Context())
-		err = layouts.Base(course.Title, CourseDetail(course, lessons, csrfToken)).Render(r.Context(), w)
+		csrfToken := auth.CSRFTokenFromContext(ctx)
+		err = layouts.Base(course.Title, CourseDetail(course, lessons, csrfToken)).Render(ctx, w)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
