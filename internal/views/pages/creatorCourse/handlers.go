@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jonahhess/ds/internal/auth"
+	"github.com/jonahhess/ds/internal/params"
 	"github.com/jonahhess/ds/internal/views/layouts"
 )
 
@@ -179,15 +180,15 @@ func Delete(db *sql.DB) http.HandlerFunc {
 // DetailPage displays course details for a creator
 func DetailPage(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		courseIDStr := chi.URLParam(r, "courseID")
-		courseID, err := strconv.Atoi(courseIDStr)
-		if err != nil {
+		ctx := r.Context()
+		courseID, ok := params.IntFrom(ctx, "courseID")
+		if !ok {
 			http.Error(w, "Invalid course ID", http.StatusBadRequest)
 			return
 		}
 
 		var title, description sql.NullString
-		err = db.QueryRow(
+		err := db.QueryRow(
 			"SELECT title, description FROM courses WHERE id = ?",
 			courseID,
 		).Scan(&title, &description)
@@ -203,7 +204,7 @@ func DetailPage(db *sql.DB) http.HandlerFunc {
 
 		// Fetch lessons for this course
 		rows, err := db.Query(
-			"SELECT lesson_index, title, text FROM lessons WHERE course_id = ? ORDER BY lesson_index",
+			"SELECT lesson_index, title, text, quizzes.id FROM lessons join quizzes on lessons.id = quizzes.lesson_id WHERE course_id = ? ORDER BY lesson_index",
 			courseID,
 		)
 		if err != nil {
@@ -215,7 +216,7 @@ func DetailPage(db *sql.DB) http.HandlerFunc {
 		var lessons []LessonDisplay
 		for rows.Next() {
 			var lesson LessonDisplay
-			err := rows.Scan(&lesson.Index, &lesson.Title, &lesson.Text)
+			err := rows.Scan(&lesson.Index, &lesson.Title, &lesson.Text, &lesson.QuizID)
 			if err != nil {
 				continue
 			}

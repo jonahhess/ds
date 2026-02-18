@@ -163,8 +163,8 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 			r.Get("/", review.Page(DB))
 			r.Get("/next", review.NextCard(DB))
 			r.Get("/complete", review.Complete(DB))
-			r.Route("/card/{cardID}", func(r chi.Router) {
-				r.Use(params.Int("cardID"))
+			r.Route("/card/{questionID}", func(r chi.Router) {
+				r.Use(params.Int("questionID"))
 				r.Get("/answer", review.ShowAnswer(DB))
 				r.Post("/rate", review.RateCard(DB))
 			})
