@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jonahhess/ds/internal/auth"
+	"github.com/jonahhess/ds/internal/params"
 	"github.com/jonahhess/ds/internal/views/layouts"
 )
 
@@ -29,16 +30,9 @@ func LessonCreate(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		courseID, _ := strconv.Atoi(chi.URLParam(r, "courseID"))
-
-		var createdBy int
-		err := db.QueryRow("SELECT created_by FROM courses WHERE id = ?", courseID).Scan(&createdBy)
-		if err != nil {
-			http.Error(w, "Course not found", http.StatusNotFound)
-			return
-		}
-		if createdBy != userID {
-			http.Error(w, "Forbidden", http.StatusForbidden)
+		courseID, ok := params.IntFrom(r.Context(), "courseID")
+		if !ok {
+			http.Error(w, "Invalid course ID", http.StatusBadRequest)
 			return
 		}
 
@@ -51,9 +45,9 @@ func LessonCreate(db *sql.DB) http.HandlerFunc {
 		}
 
 		var maxIndex int
-		db.QueryRow("SELECT COALESCE(MAX(lesson_index), -1) FROM lessons WHERE course_id = ?", courseID).Scan(&maxIndex)
+		db.QueryRow("SELECT COALESCE(MAX(lesson_index), 0) FROM lessons WHERE course_id = ?", courseID).Scan(&maxIndex)
 
-		_, err = db.Exec(
+		_, err := db.Exec(
 			"INSERT INTO lessons (course_id, lesson_index, title, text, created_by) VALUES (?, ?, ?, ?, ?)",
 			courseID, maxIndex+1, title, text, userID,
 		)
@@ -68,8 +62,16 @@ func LessonCreate(db *sql.DB) http.HandlerFunc {
 
 func LessonEditPage(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		courseID, _ := strconv.Atoi(chi.URLParam(r, "courseID"))
-		lessonIndex, _ := strconv.Atoi(chi.URLParam(r, "lessonIndex"))
+		courseID, ok := params.IntFrom(r.Context(), "courseID")
+		if !ok {
+			http.Error(w, "Invalid course ID", http.StatusBadRequest)
+			return
+		}
+		lessonIndex, ok := params.IntFrom(r.Context(), "lessonIndex")
+		if !ok {
+			http.Error(w, "Invalid lesson index", http.StatusBadRequest)
+			return
+		}
 
 		var title, text string
 		err := db.QueryRow(
@@ -99,8 +101,16 @@ func LessonUpdate(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		courseID, _ := strconv.Atoi(chi.URLParam(r, "courseID"))
-		lessonIndex, _ := strconv.Atoi(chi.URLParam(r, "lessonIndex"))
+		courseID, ok := params.IntFrom(r.Context(), "courseID")
+		if !ok {
+			http.Error(w, "Invalid course ID", http.StatusBadRequest)
+			return
+		}
+		lessonIndex, ok := params.IntFrom(r.Context(), "lessonIndex")
+		if !ok {
+			http.Error(w, "Invalid lesson index", http.StatusBadRequest)
+			return
+		}
 
 		var createdBy int
 		db.QueryRow("SELECT created_by FROM courses WHERE id = ?", courseID).Scan(&createdBy)
