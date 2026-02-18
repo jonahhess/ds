@@ -7,13 +7,22 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jonahhess/ds/internal/auth"
+	"github.com/jonahhess/ds/internal/params"
 	"github.com/jonahhess/ds/internal/views/layouts"
 )
 
 func QuizNewPage(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		courseID, _ := strconv.Atoi(chi.URLParam(r, "courseID"))
-		lessonIndex, _ := strconv.Atoi(chi.URLParam(r, "lessonIndex"))
+		courseID, ok := params.IntFrom(r.Context(), "courseID")
+		if !ok {
+			http.Error(w, "Invalid course ID", http.StatusBadRequest)
+			return
+		}
+		lessonIndex, ok := params.IntFrom(r.Context(), "lessonIndex")
+		if !ok {
+			http.Error(w, "Invalid lesson index", http.StatusBadRequest)
+			return
+		}
 
 		// Check if quiz already exists for this lesson
 		var quizID int
@@ -102,5 +111,57 @@ func QuizDelete(db *sql.DB) http.HandlerFunc {
 
 		lessonIndex, _ := strconv.Atoi(chi.URLParam(r, "lessonIndex"))
 		http.Redirect(w, r, "/creator/courses/"+strconv.Itoa(courseID)+"/lessons/"+strconv.Itoa(lessonIndex), http.StatusSeeOther)
+	}
+}
+
+// DetailPage displays course details for a creator
+func QuizDetailPage(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		courseID, ok := params.IntFrom(ctx, "courseID")
+		if !ok {
+			http.Error(w, "Invalid course ID", http.StatusBadRequest)
+			return
+		}
+
+		lessonIndex, ok := params.IntFrom(ctx, "lessonIndex")
+		if !ok {
+			http.Error(w, "Invalid lesson index", http.StatusBadRequest)
+			return
+		}
+
+		quizID, ok := params.IntFrom(ctx, "quizID")
+		if !ok {
+			http.Error(w, "Invalid quiz ID", http.StatusBadRequest)
+			return
+		}
+
+		// Fetch lessons for this course
+		rows, err := db.Query(
+			"SELECT questions.id, questions.text FROM questions WHERE quiz_id = ?",
+			quizID,
+		)
+		if err != nil {
+			http.Error(w, "Database error", http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
+
+		var questions []QuestionData
+		for rows.Next() {
+			var question QuestionData
+			err := rows.Scan(&question.ID, &question.Text)
+			if err != nil {
+				continue
+			}
+		questions = append(questions, question)
+		}
+
+		csrfToken := auth.CSRFTokenFromContext(r.Context())
+		err = layouts.Base("Quiz Detail", QuizDetail(courseID, lessonIndex, quizID, questions, csrfToken)).Render(r.Context(), w)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 }
