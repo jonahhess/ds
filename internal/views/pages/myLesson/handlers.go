@@ -74,7 +74,11 @@ func GetMyLessonData(DB *sql.DB, userID int, courseID int, lessonIndex int) (*ty
     Scan(&quiz_id)
 
     if err != nil {
-        return nil, err
+		if err == sql.ErrNoRows {
+			quiz_id = 0
+		} else {
+			return nil, err
+		}
     }
     
     var data types.Lesson
