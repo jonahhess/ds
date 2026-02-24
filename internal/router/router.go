@@ -12,7 +12,6 @@ import (
 	"github.com/jonahhess/ds/internal/views/pages/courses"
 	"github.com/jonahhess/ds/internal/views/pages/creator"
 	creatorCourse "github.com/jonahhess/ds/internal/views/pages/creatorCourse"
-	"github.com/jonahhess/ds/internal/views/pages/dashboard"
 	home "github.com/jonahhess/ds/internal/views/pages/home"
 	"github.com/jonahhess/ds/internal/views/pages/login"
 	"github.com/jonahhess/ds/internal/views/pages/myAvailableCourses"
@@ -84,15 +83,6 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 			r.Post("/password", profile.ChangePasswordHandler(DB))
 			r.Get("/delete", profile.DeletePage(DB))
 			r.Delete("/", profile.Delete(DB))
-		})
-
-		// Dashboard and analytics
-		r.Get("/dashboard", dashboard.Page(DB))
-		r.Route("/dashboard", func(r chi.Router) {
-			r.Route("/{courseID}", func(r chi.Router) {
-				r.Use(params.Int("courseID"))
-				r.Get("/", dashboard.CourseProgressPage(DB))
-			})
 		})
 
 		// Creator routes
