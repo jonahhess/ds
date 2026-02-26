@@ -20,7 +20,7 @@ templ Course(courseID int, data types.CourseData, csrfToken string) {
 	if (data.UserCurrentlyEnrolled) {
 		<a href={ fmt.Sprintf("/courses/%d", courseID) }>Go to Course</a>
 	} else {
-		<form method="post" action={ fmt.Sprintf("/catalog/%d/enroll", courseID) }>
+		<form method="post" action={ fmt.Sprintf("/catalog/courses/%d/enroll", courseID) }>
 			<input type="hidden" name="csrf_token" value={ csrfToken }/>
 			<button type="submit">Start Course</button>
 		</form>
