@@ -5,6 +5,7 @@ import "github.com/jonahhess/ds/internal/auth"
 templ Home() {
 	if _, ok := auth.UserIDFromContext(ctx); !ok {
 		<h1>Hello Guest</h1>
+		<a href="/login">Login</a>
 	} else {
 		<h1>Hello User</h1>
 		<a href="/study">Study</a>
