@@ -40,7 +40,7 @@ func GetAllNotMyCourseTitles(DB *sql.DB, userID int) ([]types.Item, error){
         FROM user_courses uc
         WHERE uc.course_id = c.id
         AND uc.user_id = ?
-    )
+    ) AND c.version > 0
 `, userID)
 	if err != nil {
 		return nil, err
