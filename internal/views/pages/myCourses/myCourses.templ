@@ -10,9 +10,9 @@ templ MyCourses(userID int, courses []types.Item) {
 	<ul>
 		for _, v := range courses {
 			<li>
-				<a href={ fmt.Sprintf("/users/%d/courses/%d", userID, v.ID) }>{ v.Text }</a>
+				<a href={ fmt.Sprintf("/courses/%d", v.ID) }>{ v.Text }</a>
 			</li>
 		}
 	</ul>
-	<a href={ fmt.Sprintf("/users/%d/courses/add", userID) }>Enroll in a new course</a>
+	<a href={ fmt.Sprintf("/courses/add") }>Enroll in a new course</a>
 }

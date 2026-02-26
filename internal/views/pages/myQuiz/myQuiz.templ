@@ -7,8 +7,8 @@ import (
 )
 
 templ MyQuiz(userID int, courseID int, lessonIndex int, quizID int, quiz *types.Quiz, mistakes []int, csrfToken string) {
-	<a href={ fmt.Sprintf("/users/%d/courses/%d/lessons/%d", userID, courseID, lessonIndex) }>Back to Lesson</a>
-	<form method="post" action={ fmt.Sprintf("/users/%d/courses/%d/lessons/%d/quiz", userID, courseID, lessonIndex) }>
+	<a href={ fmt.Sprintf("/courses/%d/lessons/%d", courseID, lessonIndex) }>Back to Lesson</a>
+	<form method="post" action={ fmt.Sprintf("/courses/%d/lessons/%d/quiz", courseID, lessonIndex) }>
 		<input type="hidden" name="csrf_token" value={ csrfToken }/>
 		if len(quiz.Questions) == 0 {
 			<p>No questions</p>

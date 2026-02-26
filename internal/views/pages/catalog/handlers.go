@@ -1,4 +1,4 @@
-package courses
+package catalog
 
 import (
 	"database/sql"
@@ -13,7 +13,7 @@ func Page(DB *sql.DB) http.HandlerFunc {
 	courses, _ := GetAllCourseTitles(DB)
 
 	  if err := layouts.
-	 Base("Courses", Courses(courses)).
+	 Base("Courses", Catalog(courses)).
 	 Render(r.Context(), w); err != nil {
 		 http.Error(w, err.Error(), http.StatusInternalServerError)
 		}

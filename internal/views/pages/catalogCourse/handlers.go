@@ -1,4 +1,4 @@
-package course
+package catalogCourse
 
 import (
 	"database/sql"
@@ -20,7 +20,7 @@ func Page(DB *sql.DB) http.HandlerFunc {
 		return
 	}
 
-	courseID, ok := params.IntFrom(r.Context(), "courseID")
+	courseID, ok := params.IntFrom(ctx, "courseID")
 		if !ok {
 			errors.HandleBadRequest(w, r, "course id not found")
 			return
@@ -34,8 +34,8 @@ func Page(DB *sql.DB) http.HandlerFunc {
 
 	csrfToken := auth.CSRFToken(r)
 	 if err := layouts.
-	 Base("Course", Course(userID, courseID, *myData, csrfToken)).
-	 Render(r.Context(), w);  err != nil {
+	 Base("Course", Course(courseID, *myData, csrfToken)).
+	 Render(ctx, w);  err != nil {
 		 errors.HandleInternalError(w, r, err)
 		 return
 		}
@@ -110,7 +110,7 @@ func Enroll(DB *sql.DB) http.HandlerFunc {
 
 		csrfToken := auth.CSRFToken(r)
 		if err := layouts.
-		Base("Course", Course(userID, courseID, *myData, csrfToken)).
+		Base("Course", Course(courseID, *myData, csrfToken)).
 		Render(r.Context(), w);  err != nil {
 			errors.HandleInternalError(w, r, err)
 			return

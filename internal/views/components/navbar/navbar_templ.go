@@ -41,14 +41,14 @@ func Navbar(csrfToken string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<a href=\"/\">Home</a> <a href=\"/courses\">Courses</a> <a href=\"/study\">Study</a> <a href=\"/review\">Review</a> <a href=\"/creator\">Create</a> <a href=\"/profile\">Profile</a><form class=\"navbar-element\" method=\"POST\" action=\"/logout\"><input type=\"hidden\" name=\"csrf_token\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<a href=\"/\">Home</a> <a href=\"/study\">Study</a> <a href=\"/review\">Review</a> <a href=\"/creator\">Create</a> <a href=\"/profile\">Profile</a><form class=\"navbar-element\" method=\"POST\" action=\"/logout\"><input type=\"hidden\" name=\"csrf_token\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(csrfToken)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/components/navbar/navbar.templ`, Line: 19, Col: 60}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/components/navbar/navbar.templ`, Line: 18, Col: 60}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {

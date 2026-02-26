@@ -10,7 +10,7 @@ templ MyAvailableCourses(userID int, courses []types.Item) {
 	<ul>
 		for _, v := range courses {
 			<li>
-				<a href={ fmt.Sprintf("/courses/%d", v.ID) }>{ v.Text }</a>
+				<a href={ fmt.Sprintf("/catalog/courses/%d", v.ID) }>{ v.Text }</a>
 			</li>
 		}
 	</ul>

@@ -1,12 +1,12 @@
-package courses
+package catalog
 
 import (
 	"fmt"
 	"github.com/jonahhess/ds/internal/types"
 )
 
-templ Courses(courses []types.Item) {
-	<h1>All Courses</h1>
+templ Catalog(courses []types.Item) {
+	<h1>Catalog</h1>
 	<ul>
 		for _, v := range courses {
 			<li>

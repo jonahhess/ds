@@ -2,7 +2,6 @@ package myCourse
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 
 	"github.com/jonahhess/ds/internal/auth"
@@ -110,6 +109,6 @@ func Remove(DB *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/users/%d/courses", userID), http.StatusSeeOther)
+		http.Redirect(w, r, "/courses", http.StatusSeeOther)
 	}
 }

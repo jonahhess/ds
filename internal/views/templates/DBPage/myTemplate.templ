@@ -8,6 +8,6 @@ import (
 templ MyTemplate(userID int, items []types.Item) {
 	<h1>All Template</h1>
 	for _, v := range items {
-		<a href={ fmt.Sprintf("/users/%d/templates/%d", userID, v.ID), }>{ v.Text }</a>
+		<a href={ fmt.Sprintf("/templates/%d", v.ID), }>{ v.Text }</a>
 	}
 }

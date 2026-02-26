@@ -8,11 +8,11 @@ import (
 templ MyLesson(userID int, courseID int, lessonIndex int, lesson types.Lesson) {
 	<h2>Title: { lesson.Title }</h2>
 	if lesson.Text == "" {
-		<a href={ fmt.Sprintf("/users/%d/courses/%d/lessons/%d/generate", userID, courseID, lessonIndex) }>Generate Lesson</a>
+		<a href={ fmt.Sprintf("/courses/%d/lessons/%d/generate", courseID, lessonIndex) }>Generate Lesson</a>
 	} else {
 		<p>Text: { lesson.Text }</p>
 		if lesson.QuizID != 0 {
-			<a href={ fmt.Sprintf("/users/%d/courses/%d/lessons/%d/quiz", userID, courseID, lessonIndex) }>Start Quiz</a>
+			<a href={ fmt.Sprintf("/courses/%d/lessons/%d/quiz", courseID, lessonIndex) }>Start Quiz</a>
 		}
 	}
 }

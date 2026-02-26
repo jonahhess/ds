@@ -257,7 +257,7 @@ func Submit(DB *sql.DB) http.HandlerFunc {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			http.Redirect(w, r, fmt.Sprintf("/users/%d/courses/%d", userID, courseID), http.StatusSeeOther)
+			http.Redirect(w, r, fmt.Sprintf("/courses/%d", courseID), http.StatusSeeOther)
 			return
 		} else {		
 			isValid := validQuiz(DB, userID, quizID)

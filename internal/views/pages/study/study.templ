@@ -1,9 +1,7 @@
 package study
 
-import "fmt"
-
 templ Study(userID int) {
 	<h1>Study</h1>
-	<a href={ fmt.Sprintf("/users/%d/courses", userID) }>My Courses</a>
-	<a href="/courses">All Courses</a>
+	<a href="/courses">My Courses</a>
+	<a href="/catalog">Catalog</a>
 }

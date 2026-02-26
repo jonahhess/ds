@@ -1,4 +1,4 @@
-package course
+package catalogCourse
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-templ Course(userID int, courseID int, data types.CourseData, csrfToken string) {
+templ Course(courseID int, data types.CourseData, csrfToken string) {
 	<h1>{ data.Title }</h1>
 	if (data.Lessons != "") {
 		<ol>
@@ -18,12 +18,12 @@ templ Course(userID int, courseID int, data types.CourseData, csrfToken string) 
 		</ol>
 	}
 	if (data.UserCurrentlyEnrolled) {
-		<a href={ fmt.Sprintf("/users/%d/courses/%d", userID, courseID) }>Go to Course</a>
+		<a href={ fmt.Sprintf("/courses/%d", courseID) }>Go to Course</a>
 	} else {
-		<form method="post" action={ fmt.Sprintf("/courses/%d/enroll", courseID) }>
+		<form method="post" action={ fmt.Sprintf("/catalog/%d/enroll", courseID) }>
 			<input type="hidden" name="csrf_token" value={ csrfToken }/>
 			<button type="submit">Start Course</button>
 		</form>
 	}
-	<a href="/courses">All Courses</a>
+	<a href="/catalog">Catalog</a>
 }
