@@ -16,7 +16,6 @@ func QuestionNewPage(db *sql.DB) http.HandlerFunc {
 		lessonIndex, _ := strconv.Atoi(chi.URLParam(r, "lessonIndex"))
 
 		csrfToken := auth.CSRFTokenFromContext(r.Context())
-		w.Header().Set("Content-Type", "text/html")
 		err := layouts.Base("Add Question", NewQuestion(courseID, lessonIndex, csrfToken)).Render(r.Context(), w)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -33,6 +32,7 @@ func QuestionCreate(db *sql.DB) http.HandlerFunc {
 		}
 
 		courseID, _ := strconv.Atoi(chi.URLParam(r, "courseID"))
+		lessonIndex, _ := strconv.Atoi(chi.URLParam(r,"lessonIndex"))
 
 		var createdBy int
 		err := db.QueryRow("SELECT created_by FROM courses WHERE id = ?", courseID).Scan(&createdBy)
@@ -41,7 +41,6 @@ func QuestionCreate(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		quizID, _ := strconv.Atoi(chi.URLParam(r, "quizID"))
 		questionText := r.FormValue("question_text")
 
 		if questionText == "" {
@@ -49,13 +48,26 @@ func QuestionCreate(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
+		var lessonID int
+		err = db.QueryRow("SELECT id from lessons WHERE course_id = ? AND lesson_index = ?", courseID, lessonIndex).Scan(&lessonID)
+		if err != nil {
+			http.Error(w, "Invalid lesson id", http.StatusBadRequest)
+			return
+		}
+
+		var quizID int
+		err = db.QueryRow("SELECT id FROM quizzes WHERE lesson_id = ?", lessonID).Scan(&quizID)
+		if err != nil {
+			http.Error(w, "Invalid quiz id", http.StatusBadRequest)
+			return
+		}
 		// Insert question
 		result, err := db.Exec(
-			"INSERT INTO questions (quiz_id, text) VALUES (?, ?)",
-			quizID, questionText,
+			"INSERT INTO questions (quiz_id, text, created_by) VALUES (?, ?, ?)",
+			quizID, questionText, userID,
 		)
 		if err != nil {
-			http.Error(w, "Database error", http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -109,7 +121,7 @@ func QuestionCreate(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		lessonIndex, _ := strconv.Atoi(chi.URLParam(r, "lessonIndex"))
+		lessonIndex, _ = strconv.Atoi(chi.URLParam(r, "lessonIndex"))
 		http.Redirect(w, r, "/creator/courses/"+strconv.Itoa(courseID)+"/lessons/"+strconv.Itoa(lessonIndex)+"/quiz", http.StatusSeeOther)
 	}
 }
@@ -128,7 +140,6 @@ func QuestionEditPage(db *sql.DB) http.HandlerFunc {
 		}
 
 		csrfToken := auth.CSRFTokenFromContext(r.Context())
-		w.Header().Set("Content-Type", "text/html")
 		err = layouts.Base("Edit Question", EditQuestion(courseID, lessonIndex, questionID, questionText, csrfToken)).Render(r.Context(), w)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -161,10 +172,10 @@ func QuestionUpdate(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		err := db.QueryRow(
+		_, err := db.Exec(
 			"UPDATE questions SET text = ? WHERE id = ?",
 			questionText, questionID,
-		).Err()
+		)
 		if err != nil {
 			http.Error(w, "Failed to update question", http.StatusInternalServerError)
 			return
@@ -193,7 +204,7 @@ func QuestionDelete(db *sql.DB) http.HandlerFunc {
 		}
 
 		questionID, _ := strconv.Atoi(chi.URLParam(r, "questionID"))
-		err = db.QueryRow("DELETE FROM questions WHERE id = ?", questionID).Err()
+		_, err = db.Exec("DELETE FROM questions WHERE id = ?", questionID)
 		if err != nil {
 			http.Error(w, "Database error", http.StatusInternalServerError)
 			return
