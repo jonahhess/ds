@@ -30,11 +30,20 @@ func Page(DB *sql.DB) http.HandlerFunc {
 			return
 		}
 		
-		quizID, ok := params.IntFrom(ctx, "quizID")
-		if !ok {
-			return
-		}
-		
+	var lessonID int
+	err := DB.QueryRow("SELECT id from lessons WHERE course_id = ? AND lesson_index = ?", courseID, lessonIndex).Scan(&lessonID)
+	if err != nil {
+		http.Error(w, "Invalid lesson id", http.StatusBadRequest)
+		return
+	}
+
+	var quizID int
+	err = DB.QueryRow("SELECT id FROM quizzes WHERE lesson_id = ?", lessonID).Scan(&quizID)
+	if err != nil {
+		http.Error(w, "Invalid quiz id", http.StatusBadRequest)
+		return
+	}
+	
     isValid := validQuiz(DB, userID, quizID)
     if !isValid {
         http.Error(w, "invalid quiz", http.StatusInternalServerError)
@@ -49,7 +58,7 @@ func Page(DB *sql.DB) http.HandlerFunc {
 
 	csrfToken := auth.CSRFToken(r)
 	 if err := layouts.
-	 Base("MyQuiz", MyQuiz(userID, courseID, lessonIndex, quizID, myData, []int{}, csrfToken)).
+	 Base("MyQuiz", MyQuiz(courseID, lessonIndex, myData, []int{}, csrfToken)).
 	 Render(ctx, w);  err != nil {
 		 http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
@@ -157,12 +166,41 @@ func Submit(DB *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		quizID, ok := params.IntFrom(ctx, "quizID")
-		if !ok {
+		var lessonID int
+		err := DB.QueryRow("SELECT id from lessons WHERE course_id = ? AND lesson_index = ?", courseID, lessonIndex).Scan(&lessonID)
+		if err != nil {
+			http.Error(w, "Invalid lesson id", http.StatusBadRequest)
 			return
 		}
 
-		err := r.ParseForm()
+		var quizID int
+		err = DB.QueryRow("SELECT id FROM quizzes WHERE lesson_id = ?", lessonID).Scan(&quizID)
+		if err != nil {
+			http.Error(w, "Invalid quiz id", http.StatusBadRequest)
+			return
+		}
+
+		var totalQuestions int
+		err = DB.QueryRow("SELECT count(*) FROM questions WHERE quiz_id = ?", quizID).Scan(&totalQuestions)
+		if err != nil {
+			http.Error(w, "cannot get questions", http.StatusBadRequest)
+			return
+		}
+
+		if totalQuestions == 0 {
+			if _, err := DB.Exec(`
+				UPDATE user_courses 
+				SET current_lesson = current_lesson + 1 
+				WHERE user_id = ? AND course_id = ?`, userID, courseID); err != nil {
+					http.Error(w, "cannot update current lesson", http.StatusInternalServerError)
+					return
+				}
+			
+			http.Redirect(w, r, fmt.Sprintf("/courses/%d", courseID), http.StatusSeeOther)
+			return
+		}
+
+		err = r.ParseForm()
 		if err != nil {
 			http.Error(w, "Error parsing form data", http.StatusInternalServerError)
 			return
@@ -274,7 +312,7 @@ func Submit(DB *sql.DB) http.HandlerFunc {
 					
 			csrfToken := auth.CSRFToken(r)
 			if err := layouts.
-				Base("MyQuiz", MyQuiz(userID, courseID, lessonIndex, quizID, myData, mistakes, csrfToken)).
+				Base("MyQuiz", MyQuiz(courseID, lessonIndex, myData, mistakes, csrfToken)).
 				Render(ctx, w);  err != nil {
 		 			http.Error(w, err.Error(), http.StatusInternalServerError)
 				}
