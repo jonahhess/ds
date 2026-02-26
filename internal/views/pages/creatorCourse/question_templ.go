@@ -82,9 +82,9 @@ func QuizDetail(courseID int, lessonIndex int, questions []QuestionData, csrfTok
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var4 templ.SafeURL
-				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quiz/questions/edit?questionID=%d", courseID, lessonIndex, q.ID)))
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quiz/questions/%d/edit", courseID, lessonIndex, q.ID)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/creatorCourse/question.templ`, Line: 31, Col: 141}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/creatorCourse/question.templ`, Line: 31, Col: 130}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -95,9 +95,9 @@ func QuizDetail(courseID int, lessonIndex int, questions []QuestionData, csrfTok
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 templ.SafeURL
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quiz/questions?questionID=%d", courseID, lessonIndex, q.ID)))
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quiz/questions/%d", courseID, lessonIndex, q.ID)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/creatorCourse/question.templ`, Line: 32, Col: 141}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/creatorCourse/question.templ`, Line: 32, Col: 130}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -316,9 +316,9 @@ func EditQuestion(courseID, lessonIndex, questionID int, questionText string, cs
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var18 templ.SafeURL
-		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quiz/questions?questionID=%d", courseID, lessonIndex, questionID)))
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quiz/questions/%d", courseID, lessonIndex, questionID)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/creatorCourse/question.templ`, Line: 86, Col: 141}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/creatorCourse/question.templ`, Line: 86, Col: 130}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
