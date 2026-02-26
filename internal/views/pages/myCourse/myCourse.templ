@@ -4,7 +4,7 @@ import "fmt"
 import "github.com/jonahhess/ds/internal/types"
 import "strconv"
 
-templ MyCourse(userID int, courseData types.MyCourseData, csrfToken string) {
+templ MyCourse(courseData types.MyCourseData, csrfToken string) {
 	<h1>My Course</h1>
 	<div id="courseInfo">
 		<h2>Title: { courseData.Title }</h2>

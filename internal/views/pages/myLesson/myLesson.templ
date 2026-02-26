@@ -5,7 +5,7 @@ import (
 	"github.com/jonahhess/ds/internal/types"
 )
 
-templ MyLesson(userID int, courseID int, lessonIndex int, lesson types.Lesson) {
+templ MyLesson(courseID int, lessonIndex int, lesson types.Lesson) {
 	<h2>Title: { lesson.Title }</h2>
 	if lesson.Text == "" {
 		<a href={ fmt.Sprintf("/courses/%d/lessons/%d/generate", courseID, lessonIndex) }>Generate Lesson</a>

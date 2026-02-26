@@ -31,7 +31,7 @@ func Page(DB *sql.DB) http.HandlerFunc {
 
 	csrfToken := auth.CSRFToken(r)
 	 if err := layouts.
-	 Base("MyCourse", MyCourse(userID, *myCourseData, csrfToken)).
+	 Base("MyCourse", MyCourse(*myCourseData, csrfToken)).
 	 Render(r.Context(), w);  err != nil {
 		 http.Error(w, err.Error(), http.StatusInternalServerError)
 		}

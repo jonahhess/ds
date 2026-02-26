@@ -6,7 +6,7 @@ import (
 	"slices"
 )
 
-templ MyQuiz(userID int, courseID int, lessonIndex int, quizID int, quiz *types.Quiz, mistakes []int, csrfToken string) {
+templ MyQuiz(courseID int, lessonIndex int, quiz *types.Quiz, mistakes []int, csrfToken string) {
 	<a href={ fmt.Sprintf("/courses/%d/lessons/%d", courseID, lessonIndex) }>Back to Lesson</a>
 	<form method="post" action={ fmt.Sprintf("/courses/%d/lessons/%d/quiz", courseID, lessonIndex) }>
 		<input type="hidden" name="csrf_token" value={ csrfToken }/>

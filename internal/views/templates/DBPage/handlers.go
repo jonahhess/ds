@@ -23,7 +23,7 @@ func Page(DB *sql.DB) http.HandlerFunc {
 	}
 
 	 if err := layouts.
-	 Base("MyTemplate", MyTemplate(userID, myData)).
+	 Base("MyTemplate", MyTemplate(myData)).
 	 Render(r.Context(), w);  err != nil {
 		 http.Error(w, err.Error(), http.StatusInternalServerError)
 		}

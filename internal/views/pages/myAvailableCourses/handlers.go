@@ -24,7 +24,7 @@ func Page(DB *sql.DB) http.HandlerFunc {
 	}
 
 	 if err := layouts.
-	 Base("My Available Courses", MyAvailableCourses(userID, myTitles)).
+	 Base("My Available Courses", MyAvailableCourses(myTitles)).
 	 Render(r.Context(), w);  err != nil {
 		 http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
