@@ -62,6 +62,7 @@ func CreateTables() error {
   description TEXT,
   created_by INTEGER NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  version INTEGER DEFAULT 0,
   FOREIGN KEY (created_by) REFERENCES users(id)
 );
     `

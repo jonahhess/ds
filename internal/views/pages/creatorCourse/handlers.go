@@ -188,10 +188,11 @@ func DetailPage(db *sql.DB) http.HandlerFunc {
 		}
 
 		var title, description sql.NullString
+		var version int
 		err := db.QueryRow(
-			"SELECT title, description FROM courses WHERE id = ?",
+			"SELECT title, description, version FROM courses WHERE id = ?",
 			courseID,
-		).Scan(&title.String, &description.String)
+		).Scan(&title.String, &description.String, &version)
 
 		if err == sql.ErrNoRows {
 			http.Error(w, "Course not found", http.StatusNotFound)
@@ -226,6 +227,7 @@ func DetailPage(db *sql.DB) http.HandlerFunc {
 		course := CourseForm{
 			ID:          courseID,
 			Title:       title.String,
+			Version: 	 version,
 			Description: description,
 		}
 

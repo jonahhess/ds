@@ -65,7 +65,7 @@ func Page(DB *sql.DB) http.HandlerFunc {
 			) AS user_currently_enrolled
 		FROM courses AS c
 		JOIN users AS u ON u.id = c.created_by
-		WHERE c.id = ?
+		WHERE c.id = ? AND c.version > 0
 		`, userID, courseID, courseID).Scan(
 		&data.Title,
 		&data.Description,

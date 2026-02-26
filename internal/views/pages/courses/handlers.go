@@ -21,7 +21,7 @@ func Page(DB *sql.DB) http.HandlerFunc {
 }
 
 func GetAllCourseTitles(DB *sql.DB) ([]types.Item, error){
-	rows, err := DB.Query("SELECT id, title FROM courses")
+	rows, err := DB.Query("SELECT id, title FROM courses WHERE version > 0")
 	if err != nil {
 		return nil, err
 	}
