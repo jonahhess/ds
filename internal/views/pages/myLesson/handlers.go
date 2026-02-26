@@ -45,32 +45,31 @@ func Page(DB *sql.DB) http.HandlerFunc {
             return
         }
 		
-		// Get the user's lesson data
-		myData, err := GetMyLessonData(DB, userID, courseID, lessonIndex)
+		myData, err := GetMyLessonData(DB, courseID, lessonIndex)
 		if err != nil {
 			http.Error(w, "lesson not found", http.StatusNotFound)
 			return
 		}
 		
-		  if err := layouts.Base("My Lesson", MyLesson(userID, courseID, lessonIndex, *myData)).
+		  if err := layouts.Base("My Lesson", MyLesson(courseID, lessonIndex, *myData)).
 		  Render(ctx, w); err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 		  }
 	}
 }
 
-func GetMyLessonData(DB *sql.DB, userID int, courseID int, lessonIndex int) (*types.Lesson, error) {
+func GetMyLessonData(DB *sql.DB, courseID int, lessonIndex int) (*types.Lesson, error) {
 
     var lesson_id int
-    err0 := DB.QueryRow("SELECT id from lessons WHERE course_id = ? AND lesson_index = ?", courseID, lessonIndex).
+    err := DB.QueryRow("SELECT id from lessons WHERE course_id = ? AND lesson_index = ?", courseID, lessonIndex).
     Scan(&lesson_id)
 
-    if err0 != nil {
-        return nil, err0
+    if err != nil {
+        return nil, err
     }
         
     var quiz_id int
-    err := DB.QueryRow(`SELECT id FROM quizzes WHERE lesson_id = ?`, lesson_id).
+    err = DB.QueryRow(`SELECT id FROM quizzes WHERE lesson_id = ?`, lesson_id).
     Scan(&quiz_id)
 
     if err != nil {
@@ -82,15 +81,15 @@ func GetMyLessonData(DB *sql.DB, userID int, courseID int, lessonIndex int) (*ty
     }
     
     var data types.Lesson
-    err2 := DB.QueryRow(`
+    err = DB.QueryRow(`
     SELECT title, text FROM lessons 
     WHERE course_id = ? AND lesson_index = ?`, courseID, lessonIndex).Scan(
         &data.Title,
         &data.Text,
     )
     
-    if err2 != nil {
-        return nil, err2
+    if err != nil {
+        return nil, err
     }
     
     data.QuizID = quiz_id
