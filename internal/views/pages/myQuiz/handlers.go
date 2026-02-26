@@ -20,15 +20,22 @@ func Page(DB *sql.DB) http.HandlerFunc {
 		 return
 		}
 		
-		courseID, ok := params.IntFrom(ctx, "courseID")
-		if !ok {
-			return
-		}
-		
-		lessonIndex, ok := params.IntFrom(ctx, "lessonIndex")
-		if !ok {
-			return
-		}
+	courseID, ok := params.IntFrom(ctx, "courseID")
+	if !ok {
+		return
+	}
+	
+	lessonIndex, ok := params.IntFrom(ctx, "lessonIndex")
+	if !ok {
+		return
+	}
+
+	var exists int
+	if err := DB.QueryRow("SELECT 1 FROM user_courses WHERE user_id = ? AND course_id = ? AND current_lesson = ?", userID, courseID, lessonIndex - 1).
+	Scan(&exists); err != nil {
+		http.Error(w, "quiz not relevant", http.StatusBadRequest)
+		return
+	}
 		
 	var lessonID int
 	err := DB.QueryRow("SELECT id from lessons WHERE course_id = ? AND lesson_index = ?", courseID, lessonIndex).Scan(&lessonID)
@@ -40,8 +47,18 @@ func Page(DB *sql.DB) http.HandlerFunc {
 	var quizID int
 	err = DB.QueryRow("SELECT id FROM quizzes WHERE lesson_id = ?", lessonID).Scan(&quizID)
 	if err != nil {
-		http.Error(w, "Invalid quiz id", http.StatusBadRequest)
-		return
+		if err != sql.ErrNoRows {
+			http.Error(w, "Invalid quiz id", http.StatusBadRequest)
+			return
+		} else {
+			csrfToken := auth.CSRFToken(r)
+			emptyQuiz := types.Quiz{Questions: []types.Question{}}
+			if err := layouts.
+			Base("MyQuiz", MyQuiz(courseID, lessonIndex, &emptyQuiz, []int{}, csrfToken)).
+			Render(ctx, w);  err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+		}
 	}
 	
     isValid := validQuiz(DB, userID, quizID)
@@ -176,8 +193,12 @@ func Submit(DB *sql.DB) http.HandlerFunc {
 		var quizID int
 		err = DB.QueryRow("SELECT id FROM quizzes WHERE lesson_id = ?", lessonID).Scan(&quizID)
 		if err != nil {
-			http.Error(w, "Invalid quiz id", http.StatusBadRequest)
-			return
+			if err == sql.ErrNoRows {
+				// no quiz id associated with this lesson - continue
+			} else {
+				http.Error(w, "Invalid quiz id", http.StatusBadRequest)
+				return
+			}
 		}
 
 		var totalQuestions int
