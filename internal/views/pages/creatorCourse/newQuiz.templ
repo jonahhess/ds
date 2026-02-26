@@ -11,7 +11,7 @@ type QuizForm struct {
 templ NewQuiz(courseID int, lessonIndex int, csrfToken string) {
 	<div class="container">
 		<h1>Create New Quiz</h1>
-		<form action={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quizzes", courseID, lessonIndex)) } method="post">
+		<form action={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quiz", courseID, lessonIndex)) } method="post">
 			<input type="hidden" name="csrf_token" value={ csrfToken }/>
 			<div class="form-actions">
 				<button type="submit" class="btn btn-primary">Create Quiz</button>
