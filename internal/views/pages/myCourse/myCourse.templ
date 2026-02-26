@@ -15,7 +15,9 @@ templ MyCourse(courseData types.MyCourseData, csrfToken string) {
 	if strconv.Itoa(courseData.CurrentLesson) < strconv.Itoa(courseData.TotalLessons) {
 		<a href={ fmt.Sprintf("/courses/%d/lessons/%d", courseData.CourseID, courseData.CurrentLesson+1) }>Start Course</a>
 	}
-	<a href={ fmt.Sprintf("/courses/%d", courseData.CourseID) }>Course Page</a>
+	if courseData.Version > 0 {
+		<a href={ fmt.Sprintf("/catalog/courses/%d", courseData.CourseID) }>Course Page</a>
+	}
 	<a href={ fmt.Sprintf("/courses") }>My Courses</a>
 	<form method="post" action={ fmt.Sprintf("/courses/%d/remove", courseData.CourseID) }>
 		<input type="hidden" name="csrf_token" value={ csrfToken }/>
