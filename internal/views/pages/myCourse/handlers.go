@@ -55,7 +55,8 @@ func Page(DB *sql.DB) http.HandlerFunc {
 				SELECT COUNT(*)
 				FROM lessons
 				WHERE course_id = uc.course_id
-			) AS total_lessons
+			) AS total_lessons,
+			 c.version
 		FROM user_courses AS uc
 		JOIN courses AS c ON c.id = uc.course_id
 		JOIN users AS u ON u.id = c.created_by
@@ -74,6 +75,7 @@ func Page(DB *sql.DB) http.HandlerFunc {
 		&data.CurrentLesson,
 		&data.CurrentLessonName,
 		&data.TotalLessons,
+		&data.Version,
     )
 
     if err != nil {

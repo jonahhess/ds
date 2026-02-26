@@ -12,4 +12,5 @@ type MyCourseData struct {
 	CurrentLesson int
 	TotalLessons  int       // count of lessons
 	CurrentLessonName string
+	Version int
 }
