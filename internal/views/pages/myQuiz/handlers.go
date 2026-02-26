@@ -59,6 +59,7 @@ func Page(DB *sql.DB) http.HandlerFunc {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 		}
+		return
 	}
 	
     isValid := validQuiz(DB, userID, quizID)
