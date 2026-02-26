@@ -134,7 +134,7 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 			})
 
 		r.Route("/catalog", func(r chi.Router) {
-			r.Route("/{courseID}", func(r chi.Router) {
+			r.Route("/courses/{courseID}", func(r chi.Router) {
 				r.Use(params.Int("courseID"))
 				r.Post("/enroll", catalogCourse.Enroll(DB))
 				r.Get("/", catalogCourse.Page(DB))
