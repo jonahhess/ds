@@ -1,0 +1,22 @@
+package new
+
+templ NewCourse(csrfToken string) {
+	<div class="container">
+		<h1>Create New Course</h1>
+		<form action="/creator/courses" method="post">
+			<input type="hidden" name="csrf_token" value={ csrfToken }/>
+			<div class="form-group">
+				<label for="title">Course Title</label>
+				<input id="title" type="text" name="title" required placeholder="Enter course title"/>
+			</div>
+			<div class="form-group">
+				<label for="description">Description</label>
+				<textarea id="description" name="description" rows="5" placeholder="Enter course description (optional)"></textarea>
+			</div>
+			<div class="form-actions">
+				<button type="submit" class="btn btn-primary">Create Course</button>
+				<a href="/creator" class="btn btn-secondary">Cancel</a>
+			</div>
+		</form>
+	</div>
+}

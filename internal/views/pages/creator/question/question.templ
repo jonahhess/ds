@@ -1,0 +1,55 @@
+package question
+
+import "fmt"
+
+templ NewQuestion(courseID int, lessonIndex int, csrfToken string) {
+	<div class="container">
+		<h1>Add Question</h1>
+		<form action={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quiz/questions", courseID, lessonIndex)) } method="post">
+			<input type="hidden" name="csrf_token" value={ csrfToken }/>
+			<div class="form-group">
+				<label for="question_text">Question</label>
+				<textarea id="question_text" name="question_text" rows="4" required placeholder="Enter the question text"></textarea>
+			</div>
+			<fieldset>
+				<legend>Answers</legend>
+				<div class="answers-group">
+					for i := 1; i <= 4; i++ {
+						<div class="form-group">
+							<label for={ fmt.Sprintf("answer_%d", i) }>Answer { fmt.Sprintf("%d", i) }</label>
+							<div class="answer-input">
+								<input id={ fmt.Sprintf("answer_%d", i) } type="text" name={ fmt.Sprintf("answer_%d", i) } required placeholder="Enter answer text"/>
+								<label>
+									<input type="radio" name="correct_answer" value={ fmt.Sprintf("%d", i) } required/>
+									Correct Answer
+								</label>
+							</div>
+						</div>
+					}
+				</div>
+			</fieldset>
+			<div class="form-actions">
+				<button type="submit" class="btn btn-primary">Add Question</button>
+				<a href={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quiz", courseID, lessonIndex)) } class="btn btn-secondary">Cancel</a>
+			</div>
+		</form>
+	</div>
+}
+
+templ EditQuestion(courseID, lessonIndex, questionID int, questionText string, csrfToken string) {
+	<div class="container">
+		<h1>Edit Question</h1>
+		<form action={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quiz/questions/%d", courseID, lessonIndex, questionID)) } method="post">
+			<input type="hidden" name="csrf_token" value={ csrfToken }/>
+			<input type="hidden" name="_method" value="PATCH"/>
+			<div class="form-group">
+				<label for="question_text">Question</label>
+				<textarea id="question_text" name="question_text" rows="4" required>{ questionText }</textarea>
+			</div>
+			<div class="form-actions">
+				<button type="submit" class="btn btn-primary">Update Question</button>
+				<a href={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quiz", courseID, lessonIndex)) } class="btn btn-secondary">Cancel</a>
+			</div>
+		</form>
+	</div>
+}

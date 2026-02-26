@@ -7,23 +7,30 @@ import (
 
 	"github.com/jonahhess/ds/internal/auth"
 	"github.com/jonahhess/ds/internal/params"
-	about "github.com/jonahhess/ds/internal/views/pages/about"
-	"github.com/jonahhess/ds/internal/views/pages/catalog"
-	"github.com/jonahhess/ds/internal/views/pages/catalogCourse"
+	"github.com/jonahhess/ds/internal/views/pages/courses"
+	myCourse "github.com/jonahhess/ds/internal/views/pages/courses/course"
+	"github.com/jonahhess/ds/internal/views/pages/courses/myAvailableCourses"
+	"github.com/jonahhess/ds/internal/views/pages/courses/myLesson"
+	"github.com/jonahhess/ds/internal/views/pages/courses/myQuiz"
 	"github.com/jonahhess/ds/internal/views/pages/creator"
-	creatorCourse "github.com/jonahhess/ds/internal/views/pages/creatorCourse"
-	home "github.com/jonahhess/ds/internal/views/pages/home"
-	"github.com/jonahhess/ds/internal/views/pages/login"
-	"github.com/jonahhess/ds/internal/views/pages/myAvailableCourses"
-	"github.com/jonahhess/ds/internal/views/pages/myCourse"
-	"github.com/jonahhess/ds/internal/views/pages/myCourses"
-	"github.com/jonahhess/ds/internal/views/pages/myLesson"
-	"github.com/jonahhess/ds/internal/views/pages/myQuiz"
-	"github.com/jonahhess/ds/internal/views/pages/notFound"
-	"github.com/jonahhess/ds/internal/views/pages/profile"
+	creatorCourse "github.com/jonahhess/ds/internal/views/pages/creator/course"
+	creatorCourseEdit "github.com/jonahhess/ds/internal/views/pages/creator/course/edit"
+	creatorCourseNew "github.com/jonahhess/ds/internal/views/pages/creator/course/new"
+
+	creatorLesson "github.com/jonahhess/ds/internal/views/pages/creator/lesson"
+	creatorQuestion "github.com/jonahhess/ds/internal/views/pages/creator/question"
+	creatorQuiz "github.com/jonahhess/ds/internal/views/pages/creator/quiz"
+
+	"github.com/jonahhess/ds/internal/views/pages/home"
+	"github.com/jonahhess/ds/internal/views/pages/home/about"
+	"github.com/jonahhess/ds/internal/views/pages/home/catalog"
+	catalogCourse "github.com/jonahhess/ds/internal/views/pages/home/catalog/course"
+	"github.com/jonahhess/ds/internal/views/pages/home/login"
+	"github.com/jonahhess/ds/internal/views/pages/home/notFound"
+	"github.com/jonahhess/ds/internal/views/pages/home/profile"
+	"github.com/jonahhess/ds/internal/views/pages/home/signup"
+	"github.com/jonahhess/ds/internal/views/pages/home/study"
 	"github.com/jonahhess/ds/internal/views/pages/review"
-	"github.com/jonahhess/ds/internal/views/pages/signup"
-	"github.com/jonahhess/ds/internal/views/pages/study"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -88,42 +95,41 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 			r.Get("/", creator.Page(DB))
 			
 			r.Route("/courses", func(r chi.Router) {
-				r.Get("/new", creatorCourse.NewPage())
+				r.Get("/new", creatorCourseNew.Page())
 				r.Post("/", creatorCourse.Create(DB))
 				
 				r.Route("/{courseID}", func(r chi.Router) {
 					r.Use(params.Int("courseID"))
 					r.Use(auth.RequireCreatorMiddleware(DB))
 					
-					r.Get("/", creatorCourse.DetailPage(DB))
-					r.Get("/edit", creatorCourse.EditPage(DB))
+					r.Get("/", creatorCourse.Page(DB))
+					r.Get("/edit", creatorCourseEdit.Page(DB))
 					r.Patch("/", creatorCourse.Update(DB))
 					r.Delete("/", creatorCourse.Delete(DB))
 					r.Post("/version", creatorCourse.Version(DB))
 					
 					r.Route("/lessons/{lessonIndex}", func(r chi.Router) {
 						r.Use(params.Int("lessonIndex"))
-						r.Get("/new", creatorCourse.LessonNewPage())
-						r.Post("/", creatorCourse.LessonCreate(DB))
-						r.Get("/edit", creatorCourse.LessonEditPage(DB))
-						r.Patch("/", creatorCourse.LessonUpdate(DB))
-						r.Delete("/", creatorCourse.LessonDelete(DB))
+						r.Get("/new", creatorLesson.LessonNewPage())
+						r.Post("/", creatorLesson.LessonCreate(DB))
+						r.Get("/edit", creatorLesson.LessonEditPage(DB))
+						r.Patch("/", creatorLesson.LessonUpdate(DB))
+						r.Delete("/", creatorLesson.LessonDelete(DB))
 						
 						r.Route("/quiz", func(r chi.Router) {
-							r.Get("/new", creatorCourse.QuizNewPage(DB))
-							r.Post("/", creatorCourse.QuizCreate(DB))
-							r.Get("/", creatorCourse.QuizDetailPage(DB))
-							r.Delete("/", creatorCourse.QuizDelete(DB))
+							r.Post("/", creatorQuiz.QuizCreate(DB))
+							r.Get("/", creatorQuiz.Page(DB))
+							r.Delete("/", creatorQuiz.QuizDelete(DB))
 							
 							r.Route("/questions", func(r chi.Router) {
-								r.Get("/new", creatorCourse.QuestionNewPage(DB))
-								r.Post("/", creatorCourse.QuestionCreate(DB))
+								r.Get("/new", creatorQuestion.QuestionNewPage(DB))
+								r.Post("/", creatorQuestion.QuestionCreate(DB))
 								
 								r.Route("/{questionID}", func(r chi.Router) {
 									r.Use(params.Int("questionID"))
-									r.Get("/edit", creatorCourse.QuestionEditPage(DB))
-									r.Patch("/", creatorCourse.QuestionUpdate(DB))
-									r.Delete("/", creatorCourse.QuestionDelete(DB))
+									r.Get("/edit", creatorQuestion.QuestionEditPage(DB))
+									r.Patch("/", creatorQuestion.QuestionUpdate(DB))
+									r.Delete("/", creatorQuestion.QuestionDelete(DB))
 								})
 							})
 						})
@@ -167,7 +173,7 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 					r.Get("/", myLesson.Page(DB))
 					})	
 			})
-			r.Get("/", myCourses.Page(DB))
+			r.Get("/", courses.Page(DB))
 		})
 	})
 

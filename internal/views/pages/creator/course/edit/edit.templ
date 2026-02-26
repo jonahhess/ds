@@ -1,0 +1,32 @@
+package edit
+
+import (
+	"fmt"
+	"github.com/jonahhess/ds/internal/types"
+)
+
+templ EditCourse(course types.CourseForm, csrfToken string) {
+	<div class="container">
+		<h1>Edit Course: { course.Title }</h1>
+		<form action={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d", course.ID)) } method="post">
+			<input type="hidden" name="csrf_token" value={ csrfToken }/>
+			<input type="hidden" name="_method" value="PATCH"/>
+			<div class="form-group">
+				<label for="title">Course Title</label>
+				<input id="title" type="text" name="title" required value={ course.Title }/>
+			</div>
+			<div class="form-group">
+				<label for="description">Description</label>
+				<textarea id="description" name="description" rows="5">
+					if course.Description.Valid {
+						{ course.Description.String }
+					}
+				</textarea>
+			</div>
+			<div class="form-actions">
+				<button type="submit" class="btn btn-primary">Update Course</button>
+				<a href={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d", course.ID)) } class="btn btn-secondary">Cancel</a>
+			</div>
+		</form>
+	</div>
+}
