@@ -93,9 +93,9 @@ func MyLesson(userID int, courseID int, lessonIndex int, lesson types.Lesson) te
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 templ.SafeURL
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("/users/%d/courses/%d/lessons/%d/quizzes/%d", userID, courseID, lessonIndex, lesson.QuizID))
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinURLErrs(fmt.Sprintf("/users/%d/courses/%d/lessons/%d/quiz", userID, courseID, lessonIndex))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/myLesson/myLesson.templ`, Line: 15, Col: 116}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/pages/myLesson/myLesson.templ`, Line: 15, Col: 95}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {

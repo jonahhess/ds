@@ -120,6 +120,7 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 							
 							r.Route("/{quizID}", func(r chi.Router) {
 								r.Use(params.Int("quizID"))
+								r.Get("/", creatorCourse.QuizDetailPage(DB))
 								r.Delete("/", creatorCourse.QuizDelete(DB))
 								
 								// Creator question/answer management
@@ -172,8 +173,7 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 					r.Post("/remove", myCourse.Remove(DB))
 					r.Route("/lessons/{lessonIndex}", func(r chi.Router) {
 						r.Use(params.Int("lessonIndex"))
-						r.Route("/quizzes/{quizID}", func(r chi.Router) {
-							r.Use(params.Int("quizID"))
+						r.Route("/quizzes", func(r chi.Router) {
 							r.Get("/",myQuiz.Page(DB))
 							r.Post("/", myQuiz.Submit(DB))
 						})

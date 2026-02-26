@@ -33,7 +33,7 @@ func QuizNewPage(db *sql.DB) http.HandlerFunc {
 
 		if err == nil {
 			// Quiz exists, redirect to detail
-			http.Redirect(w, r, "/creator/courses/"+strconv.Itoa(courseID)+"/lessons/"+strconv.Itoa(lessonIndex)+"/quizzes/"+strconv.Itoa(quizID), http.StatusSeeOther)
+			http.Redirect(w, r, "/creator/courses/"+strconv.Itoa(courseID)+"/lessons/"+strconv.Itoa(lessonIndex)+"/quiz", http.StatusSeeOther)
 			return
 		}
 
@@ -75,7 +75,7 @@ func QuizCreate(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		result, err := db.Exec(
+		_, err = db.Exec(
 			"INSERT INTO quizzes (lesson_id) VALUES (?)",
 			lessonID,
 		)
@@ -84,8 +84,7 @@ func QuizCreate(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		quizID, _ := result.LastInsertId()
-		http.Redirect(w, r, "/creator/courses/"+strconv.Itoa(courseID)+"/lessons/"+strconv.Itoa(lessonIndex)+"/quizzes/"+strconv.Itoa(int(quizID)), http.StatusSeeOther)
+		http.Redirect(w, r, "/creator/courses/"+strconv.Itoa(courseID)+"/lessons/"+strconv.Itoa(lessonIndex)+"/quiz", http.StatusSeeOther)
 	}
 }
 
@@ -130,13 +129,21 @@ func QuizDetailPage(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		quizID, ok := params.IntFrom(ctx, "quizID")
-		if !ok {
-			http.Error(w, "Invalid quiz ID", http.StatusBadRequest)
+		var lessonID int
+		err := db.QueryRow("SELECT id from lessons WHERE course_id = ? AND lesson_index = ?", courseID, lessonIndex).Scan(&lessonID)
+		if err != nil {
+			http.Error(w, "Invalid lesson id", http.StatusBadRequest)
 			return
 		}
 
-		// Fetch lessons for this course
+		var quizID int
+		err = db.QueryRow("SELECT id FROM quizzes WHERE lesson_id = ?", lessonID).Scan(&quizID)
+		if err != nil {
+			http.Error(w, "Invalid quiz id", http.StatusBadRequest)
+			return
+		}
+
+		// Fetch quiz questions for this lesson id
 		rows, err := db.Query(
 			"SELECT questions.id, questions.text FROM questions WHERE quiz_id = ?",
 			quizID,
@@ -158,7 +165,7 @@ func QuizDetailPage(db *sql.DB) http.HandlerFunc {
 		}
 
 		csrfToken := auth.CSRFTokenFromContext(r.Context())
-		err = layouts.Base("Quiz Detail", QuizDetail(courseID, lessonIndex, quizID, questions, csrfToken)).Render(r.Context(), w)
+		err = layouts.Base("Quiz Detail", QuizDetail(courseID, lessonIndex, questions, csrfToken)).Render(r.Context(), w)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

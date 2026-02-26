@@ -12,13 +12,12 @@ import (
 
 func QuestionNewPage(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		quizID, _ := strconv.Atoi(chi.URLParam(r, "quizID"))
 		courseID, _ := strconv.Atoi(chi.URLParam(r, "courseID"))
 		lessonIndex, _ := strconv.Atoi(chi.URLParam(r, "lessonIndex"))
 
 		csrfToken := auth.CSRFTokenFromContext(r.Context())
 		w.Header().Set("Content-Type", "text/html")
-		err := layouts.Base("Add Question", NewQuestion(quizID, courseID, lessonIndex, csrfToken)).Render(r.Context(), w)
+		err := layouts.Base("Add Question", NewQuestion(courseID, lessonIndex, csrfToken)).Render(r.Context(), w)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
@@ -111,14 +110,13 @@ func QuestionCreate(db *sql.DB) http.HandlerFunc {
 		}
 
 		lessonIndex, _ := strconv.Atoi(chi.URLParam(r, "lessonIndex"))
-		http.Redirect(w, r, "/creator/courses/"+strconv.Itoa(courseID)+"/lessons/"+strconv.Itoa(lessonIndex)+"/quizzes/"+strconv.Itoa(quizID), http.StatusSeeOther)
+		http.Redirect(w, r, "/creator/courses/"+strconv.Itoa(courseID)+"/lessons/"+strconv.Itoa(lessonIndex)+"/quiz", http.StatusSeeOther)
 	}
 }
 
 func QuestionEditPage(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		questionID, _ := strconv.Atoi(chi.URLParam(r, "questionID"))
-		quizID, _ := strconv.Atoi(chi.URLParam(r, "quizID"))
 		courseID, _ := strconv.Atoi(chi.URLParam(r, "courseID"))
 		lessonIndex, _ := strconv.Atoi(chi.URLParam(r, "lessonIndex"))
 
@@ -131,7 +129,7 @@ func QuestionEditPage(db *sql.DB) http.HandlerFunc {
 
 		csrfToken := auth.CSRFTokenFromContext(r.Context())
 		w.Header().Set("Content-Type", "text/html")
-		err = layouts.Base("Edit Question", EditQuestion(courseID, lessonIndex, quizID, questionID, questionText, csrfToken)).Render(r.Context(), w)
+		err = layouts.Base("Edit Question", EditQuestion(courseID, lessonIndex, questionID, questionText, csrfToken)).Render(r.Context(), w)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
@@ -172,9 +170,8 @@ func QuestionUpdate(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		quizID, _ := strconv.Atoi(chi.URLParam(r, "quizID"))
 		lessonIndex, _ := strconv.Atoi(chi.URLParam(r, "lessonIndex"))
-		http.Redirect(w, r, "/creator/courses/"+strconv.Itoa(courseID)+"/lessons/"+strconv.Itoa(lessonIndex)+"/quizzes/"+strconv.Itoa(quizID), http.StatusSeeOther)
+		http.Redirect(w, r, "/creator/courses/"+strconv.Itoa(courseID)+"/lessons/"+strconv.Itoa(lessonIndex)+"/quiz", http.StatusSeeOther)
 	}
 }
 
@@ -202,8 +199,7 @@ func QuestionDelete(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		quizID, _ := strconv.Atoi(chi.URLParam(r, "quizID"))
 		lessonIndex, _ := strconv.Atoi(chi.URLParam(r, "lessonIndex"))
-		http.Redirect(w, r, "/creator/courses/"+strconv.Itoa(courseID)+"/lessons/"+strconv.Itoa(lessonIndex)+"/quizzes/"+strconv.Itoa(quizID), http.StatusSeeOther)
+		http.Redirect(w, r, "/creator/courses/"+strconv.Itoa(courseID)+"/lessons/"+strconv.Itoa(lessonIndex)+"/quiz", http.StatusSeeOther)
 	}
 }
