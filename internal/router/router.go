@@ -112,26 +112,25 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 						r.Route("/quiz", func(r chi.Router) {
 							r.Get("/new", creatorCourse.QuizNewPage(DB))
 							r.Post("/", creatorCourse.QuizCreate(DB))
-								r.Get("/", creatorCourse.QuizDetailPage(DB))
-								r.Delete("/", creatorCourse.QuizDelete(DB))
+							r.Get("/", creatorCourse.QuizDetailPage(DB))
+							r.Delete("/", creatorCourse.QuizDelete(DB))
+							
+							r.Route("/questions", func(r chi.Router) {
+								r.Get("/new", creatorCourse.QuestionNewPage(DB))
+								r.Post("/", creatorCourse.QuestionCreate(DB))
 								
-								// Creator question/answer management
-								r.Route("/questions", func(r chi.Router) {
-									r.Get("/new", creatorCourse.QuestionNewPage(DB))
-									r.Post("/", creatorCourse.QuestionCreate(DB))
-									
-									r.Route("/{questionID}", func(r chi.Router) {
-										r.Use(params.Int("questionID"))
-										r.Get("/edit", creatorCourse.QuestionEditPage(DB))
-										r.Patch("/", creatorCourse.QuestionUpdate(DB))
-										r.Delete("/", creatorCourse.QuestionDelete(DB))
-									})
+								r.Route("/{questionID}", func(r chi.Router) {
+									r.Use(params.Int("questionID"))
+									r.Get("/edit", creatorCourse.QuestionEditPage(DB))
+									r.Patch("/", creatorCourse.QuestionUpdate(DB))
+									r.Delete("/", creatorCourse.QuestionDelete(DB))
 								})
 							})
 						})
 					})
 				})
 			})
+		})
 
 		r.Route("/catalog", func(r chi.Router) {
 			r.Route("/courses/{courseID}", func(r chi.Router) {
