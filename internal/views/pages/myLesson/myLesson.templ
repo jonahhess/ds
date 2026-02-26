@@ -13,6 +13,8 @@ templ MyLesson(courseID int, lessonIndex int, lesson types.Lesson) {
 		<p>Text: { lesson.Text }</p>
 		if lesson.QuizID != 0 {
 			<a href={ fmt.Sprintf("/courses/%d/lessons/%d/quiz", courseID, lessonIndex) }>Start Quiz</a>
+		} else {
+			<p>No quiz available</p>
 		}
 	}
 }
