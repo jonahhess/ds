@@ -28,8 +28,8 @@ templ QuizDetail(courseID int, lessonIndex int, questions []QuestionData, csrfTo
 						<tr>
 							<td>{ q.Text }</td>
 							<td>
-								<a href={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quiz/questions/edit?questionID=%d", courseID, lessonIndex, q.ID)) } class="btn btn-sm">Edit</a>
-								<form action={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quiz/questions?questionID=%d", courseID, lessonIndex, q.ID)) } method="post" style="display: inline;">
+								<a href={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quiz/questions/%d/edit", courseID, lessonIndex, q.ID)) } class="btn btn-sm">Edit</a>
+								<form action={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quiz/questions/%d", courseID, lessonIndex, q.ID)) } method="post" style="display: inline;">
 									<input type="hidden" name="csrf_token" value={ csrfToken }/>
 									<input type="hidden" name="_method" value="DELETE"/>
 									<button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this question?')">Delete</button>
@@ -83,7 +83,7 @@ templ NewQuestion(courseID int, lessonIndex int, csrfToken string) {
 templ EditQuestion(courseID, lessonIndex, questionID int, questionText string, csrfToken string) {
 	<div class="container">
 		<h1>Edit Question</h1>
-		<form action={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quiz/questions?questionID=%d", courseID, lessonIndex, questionID)) } method="post">
+		<form action={ templ.SafeURL(fmt.Sprintf("/creator/courses/%d/lessons/%d/quiz/questions/%d", courseID, lessonIndex, questionID)) } method="post">
 			<input type="hidden" name="csrf_token" value={ csrfToken }/>
 			<input type="hidden" name="_method" value="PATCH"/>
 			<div class="form-group">
