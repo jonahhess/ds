@@ -238,3 +238,36 @@ func DetailPage(db *sql.DB) http.HandlerFunc {
 		}
 	}
 }
+
+func Version(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, ok := auth.UserIDFromContext(r.Context())
+		if !ok {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		courseIDStr := chi.URLParam(r, "courseID")
+		courseID, err := strconv.Atoi(courseIDStr)
+		if err != nil {
+			http.Error(w, "Invalid course ID", http.StatusBadRequest)
+			return
+		}
+
+		version, err := strconv.Atoi(r.FormValue("version"))
+		if err != nil {
+			version = 1
+		}
+
+		_, err = db.Exec(
+			"UPDATE courses SET version = ? WHERE id = ? AND created_by = ?",
+			version, courseID, userID,
+		)
+		if err != nil {
+			http.Error(w, "Database error", http.StatusInternalServerError)
+			return
+		}
+
+		http.Redirect(w, r, "/creator/courses/"+strconv.Itoa(courseID), http.StatusSeeOther)
+	}
+}

@@ -102,6 +102,7 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 					r.Get("/edit", creatorCourse.EditPage(DB))
 					r.Patch("/", creatorCourse.Update(DB))
 					r.Delete("/", creatorCourse.Delete(DB))
+					r.Post("/version", creatorCourse.Version(DB))
 					
 					// Creator lesson management
 					r.Route("/lessons/{lessonIndex}", func(r chi.Router) {
