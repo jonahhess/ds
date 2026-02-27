@@ -1,4 +1,4 @@
-package courses
+package root
 
 import (
 	"fmt"
@@ -14,5 +14,5 @@ templ Courses(courses []types.Item) {
 			</li>
 		}
 	</ul>
-	<a href={ fmt.Sprintf("/courses/add") }>Enroll in a new course</a>
+	<a href="/courses/add">Enroll in a new course</a>
 }

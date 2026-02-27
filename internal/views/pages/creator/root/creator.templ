@@ -1,4 +1,4 @@
-package creator
+package root
 
 import (
 	"database/sql"

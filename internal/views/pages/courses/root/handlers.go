@@ -1,4 +1,4 @@
-package courses
+package root
 
 import (
 	"database/sql"
