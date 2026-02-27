@@ -30,7 +30,8 @@ import (
 	home "github.com/jonahhess/ds/internal/views/pages/home/root"
 	"github.com/jonahhess/ds/internal/views/pages/home/signup"
 	"github.com/jonahhess/ds/internal/views/pages/home/study"
-	"github.com/jonahhess/ds/internal/views/pages/review"
+	"github.com/jonahhess/ds/internal/views/pages/review/card"
+	review "github.com/jonahhess/ds/internal/views/pages/review/root"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -80,6 +81,8 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 	
 	r.Group(func(r chi.Router) {
 		r.Use(auth.RequireAuthMiddleware)
+		
+		r.Get("/study", study.Page)
 		
 		r.Route("/profile", func(r chi.Router) {
 			r.Get("/", profile.ViewPage(DB))
@@ -146,15 +149,15 @@ func SetupRoutes(sessionStore *sessions.CookieStore, DB *sql.DB) *chi.Mux {
 			})
 			r.Get("/",catalog.Page(DB))
 		})
-		r.Get("/study", study.Page)
+
 		r.Route("/review", func(r chi.Router) {
 			r.Get("/", review.Page(DB))
-			r.Get("/next", review.NextCard(DB))
-			r.Get("/complete", review.Complete(DB))
+			r.Post("/", card.ShowAnswer(DB))
+			r.Get("/next", card.NextCard(DB))
 			r.Route("/card/{questionID}", func(r chi.Router) {
 				r.Use(params.Int("questionID"))
-				r.Get("/answer", review.ShowAnswer(DB))
-				r.Post("/rate", review.RateCard(DB))
+				r.Post("/", card.ShowAnswer(DB))
+				r.Post("/rate", card.RateCard(DB))
 			})
 		})
 
