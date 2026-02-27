@@ -79,7 +79,9 @@ func Page(DB *sql.DB) http.HandlerFunc {
     )
 
     if err != nil {
-        return nil, err
+		if err != sql.ErrNoRows {
+			return nil, err
+		}
     }
 
     return &data, nil
