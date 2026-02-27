@@ -1,0 +1,63 @@
+package card
+
+import (
+	"fmt"
+	"github.com/jonahhess/ds/internal/types"
+	"strconv"
+)
+
+templ Card(card types.ReviewCard, userAnswer int, correctAnswer int, csrfToken string) {
+	<h1>Review Card</h1>
+	<div id="card-question">
+		<div style="border: 2px solid #333; padding: 20px; margin: 20px 0; border-radius: 8px; min-height: 200px;">
+			<h2>Question</h2>
+			<p style="font-size: 1.2em;">{ card.QuestionText }</p>
+		</div>
+		if userAnswer == 0 {
+			<form action={ fmt.Sprintf("/review/card/%d", card.QuestionID) } method="post">
+				<input type="hidden" name="csrf_token" value={ csrfToken }/>
+				for i, answer := range card.Answers {
+					<div>
+						<input type="radio" id={ fmt.Sprintf("answer%d", i) } name="answer" value={ answer.ID }/>
+						<label for={ fmt.Sprintf("answer%d", i) }>{ answer.Text }</label>
+						<br/>
+					</div>
+					<button type="submit">Submit</button>
+				}
+			</form>
+		} else if userAnswer != correctAnswer {
+			for _, answer := range card.Answers {
+				<div
+					style={ templ.KV("background-color: green", correctAnswer == answer.ID),
+							 templ.KV("background-color: red", userAnswer == answer.ID) }
+				>
+					<a>{ answer.Text }</a>
+				</div>
+			}
+			<a href="/review/next">Next</a>
+		} else {
+			<div style="margin-top: 30px;">
+				<p>Correct Answer!</p>
+				<h3>How well did you know this?</h3>
+				<form method="post" action={ fmt.Sprintf("/review/card/%d/rate", card.ID) }>
+					<input type="hidden" name="csrf_token" value={ csrfToken }/>
+					<div style="display: flex; gap: 10px; flex-wrap: wrap;">
+						<button type="submit" name="quality" value="3" style="padding: 10px 15px; background-color: #8bc34a; color: white; border: none; border-radius: 5px; cursor: pointer;">
+							3 - Correct with difficulty
+						</button>
+						<button type="submit" name="quality" value="4" style="padding: 10px 15px; background-color: #4caf50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+							4 - Correct after hesitation
+						</button>
+						<button type="submit" name="quality" value="5" style="padding: 10px 15px; background-color: #2196f3; color: white; border: none; border-radius: 5px; cursor: pointer;">
+							5 - Perfect response
+						</button>
+					</div>
+				</form>
+			</div>
+		}
+		<div style="margin-top: 20px; font-size: 0.9em; color: #666;">
+			<p>Repetitions: { strconv.Itoa(card.Repetitions) }</p>
+			<p>Next review in: { strconv.Itoa(card.Interval) } days</p>
+		</div>
+	</div>
+}
