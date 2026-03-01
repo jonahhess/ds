@@ -48,7 +48,7 @@ func Login(errMsg string, csrfToken string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"> <label for=\"email\">Email</label> <input id=\"email\" type=\"email\" autocomplete=\"name\" name=\"email\" required> <label for=\"password\">Password</label> <input id=\"password\" type=\"text\" autocomplete=\"current-password\" name=\"password\" required> <button type=\"submit\">Submit</button></form>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"> <label for=\"email\">Email</label> <input id=\"email\" type=\"email\" autocomplete=\"email\" name=\"email\" required> <label for=\"password\">Password</label> <input id=\"password\" type=\"text\" autocomplete=\"current-password\" name=\"password\" required> <button type=\"submit\">Submit</button></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
