@@ -2,11 +2,13 @@ package course
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jonahhess/ds/internal/auth"
+	utils "github.com/jonahhess/ds/internal/db"
 	"github.com/jonahhess/ds/internal/params"
 	"github.com/jonahhess/ds/internal/types"
 	"github.com/jonahhess/ds/internal/views/layouts"
@@ -29,22 +31,13 @@ func Create(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		result, err := db.Exec(
-			"INSERT INTO courses (title, description, created_by) VALUES (?, ?, ?)",
-			title, description, userID,
-		)
+		courseID, err := utils.CreateCourse(db, userID, title, description)
 		if err != nil {
-			http.Error(w, "Database error", http.StatusInternalServerError)
+			http.Error(w,err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		courseID, err := result.LastInsertId()
-		if err != nil {
-			http.Error(w, "Database error", http.StatusInternalServerError)
-			return
-		}
-
-		http.Redirect(w, r, "/creator/courses/"+strconv.FormatInt(courseID, 10), http.StatusSeeOther)
+		http.Redirect(w, r, fmt.Sprintf("/creator/courses/%d",courseID), http.StatusSeeOther)
 	}
 }
 
